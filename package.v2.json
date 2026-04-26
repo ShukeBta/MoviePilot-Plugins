@@ -2,34 +2,52 @@
   "seedkeeper": {
     "name": "SeedKeeper",
     "description": "做种助手 - 智能管理 MoviePilot 转移后的种子做种任务，解决转移后 qBittorrent 无法做种和硬链接失败的问题",
-    "labels": ["做种", "下载管理", "自动化"],
+    "labels": "做种,下载管理,自动化",
     "version": "1.0.0",
-    "icon": "Moviepilot_A.png",
+    "icon": "seedkeeper.png",
     "author": "ShukeBta",
     "level": 1,
     "homepage": "https://github.com/ShukeBta/MoviePilot-Plugins",
     "git": "https://github.com/ShukeBta/MoviePilot-Plugins",
-    "frontend": true,
-    "history": {
-      "1.0.0": "初始版本，支持做种任务管理、分享率策略、做种时间限制、Vue 远程组件"
-    }
+    "history": [
+      {
+        "version": "1.0.0",
+        "date": "2026-04-26",
+        "content": "初始版本，支持做种任务管理、分享率策略、做种时间限制"
+      }
+    ]
   },
-  "ShukGuangyadisk": {
+  "shukguangyadisk": {
     "name": "Shuk-光鸭云盘",
     "description": "将光鸭云盘挂载为 MoviePilot / Emby 存储介质，支持扫码登录、文件浏览、上传下载、WebDAV 挂载（Emby 直连）。",
-    "labels": ["云盘", "存储", "WebDAV", "Emby直连"],
+    "labels": "云盘,存储,WebDAV,Emby直连",
     "version": "2.2.3",
     "icon": "Guangyadisk_A.png",
     "author": "ShukeBta",
     "level": 1,
     "homepage": "https://github.com/ShukeBta/MoviePilot-Plugins",
     "git": "https://github.com/ShukeBta/MoviePilot-Plugins",
-    "frontend": true,
-    "history": {
-      "2.2.3": "重新构建前端，修复CSS注入问题",
-      "2.2.0": "新增 WebDAV 服务端",
-      "2.1.0": "新增 /stream /browse 端点",
-      "2.0.0": "初始版本"
-    }
+    "history": [
+      {
+        "version": "2.2.3",
+        "date": "2026-04-20",
+        "content": "重新构建前端，修复CSS注入问题"
+      },
+      {
+        "version": "2.2.0",
+        "date": "2026-04-15",
+        "content": "新增 WebDAV 服务端"
+      },
+      {
+        "version": "2.1.0",
+        "date": "2026-04-10",
+        "content": "新增 /stream /browse 端点"
+      },
+      {
+        "version": "2.0.0",
+        "date": "2026-04-01",
+        "content": "初始版本"
+      }
+    ]
   }
 }

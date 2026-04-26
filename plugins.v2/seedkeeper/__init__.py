@@ -20,24 +20,14 @@ class Seedkeeper(_PluginBase):
     # ==================== 插件元数据 ====================
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务"
-    plugin_icon = "mdi-seed"
+    plugin_icon = "seedkeeper.png"
     plugin_version = "1.0.0"
-    plugin_author = "SeedKeeper"
-    author_url = "https://github.com/seedkeeper"
+    plugin_author = "ShukeBta"
+    author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
     plugin_order = 50
     auth_level = 1
 
-    # ==================== Vue 渲染模式 ====================
-    def get_render_mode(self) -> Tuple[str, str]:
-        """
-        获取插件渲染模式
-        返回: (渲染模式, 组件路径)
-        vuetify: JSON 配置模式
-        vue: Module Federation 远程组件模式
-        """
-        return "vue", "dist/assets"
-    
     # ==================== 侧栏导航 ====================
     def get_sidebar_nav(self) -> List[Dict[str, Any]]:
         """

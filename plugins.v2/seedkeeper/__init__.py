@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from app.log import logger
 from app.plugins import _PluginBase
 from app.schemas.types import EventType
-from app.helper.event import eventmanager
+from app.core.event import eventmanager
 import json
 from pathlib import Path
 from datetime import datetime

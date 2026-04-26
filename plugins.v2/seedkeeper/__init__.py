@@ -367,16 +367,6 @@ class Seedkeeper(_PluginBase):
         event_data = event.event_data or {}
         self._handle_transfer_complete(event_data)
 
-    @eventmanager.register(EventType.DownloadComplete)
-    def on_download_complete(self, event) -> None:
-        """下载完成事件"""
-        if not self._enabled or not self._auto_seed:
-            return
-        
-        event_data = event.event_data or {}
-        download_info = event_data.get("download", {})
-        self._ensure_seeding(download_info)
-
     # ==================== 业务逻辑 ====================
     def _handle_new_download(self, download_info: dict) -> None:
         """处理新下载任务"""

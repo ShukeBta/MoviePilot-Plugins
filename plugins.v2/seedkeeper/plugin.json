@@ -5,6 +5,7 @@
   "icon": "seedkeeper.png",
   "author": "ShukeBta",
   "level": 1,
+  "vue": true,
   "history": [
     {
       "version": "1.0.0",

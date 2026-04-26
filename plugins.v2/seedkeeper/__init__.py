@@ -28,17 +28,27 @@ class Seedkeeper(_PluginBase):
     plugin_order = 50
     auth_level = 1
 
+    # ==================== Vue 渲染模式 ====================
+    def get_render_mode(self) -> Tuple[str, str]:
+        """
+        获取插件渲染模式
+        返回: (渲染模式, 组件路径)
+        vuetify: JSON 配置模式
+        vue: Module Federation 远程组件模式
+        """
+        return "vue", "dist/assets"
+
     # ==================== 侧栏导航 ====================
     def get_sidebar_nav(self) -> List[Dict[str, Any]]:
         """
-        注册侧栏导航入口
+        注册侧栏导航入口（仅 Vue 模式有效）
         """
         return [
             {
                 "nav_key": "main",
                 "title": "SeedKeeper",
                 "icon": "mdi-seed",
-                "section": "organize",  # 放在整理分类下
+                "section": "organize",
                 "permission": "manage",
                 "order": 15
             }

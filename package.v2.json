@@ -7,6 +7,7 @@
     "icon": "seedkeeper.png",
     "author": "ShukeBta",
     "level": 1,
+    "v2": true,
     "homepage": "https://github.com/ShukeBta/MoviePilot-Plugins",
     "git": "https://github.com/ShukeBta/MoviePilot-Plugins",
     "history": [

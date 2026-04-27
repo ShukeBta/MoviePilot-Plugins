@@ -10,6 +10,7 @@ from app.plugins import _PluginBase
 from app.schemas.types import EventType
 from app.core.event import eventmanager
 import json
+import os
 from pathlib import Path
 from datetime import datetime
 
@@ -368,6 +369,13 @@ class Seedkeeper(_PluginBase):
                 "summary": "获取全局默认做种目录"
             },
             {
+                "path": "/fs/ls",
+                "endpoint": self.fs_ls,
+                "methods": ["GET"],
+                "auth": "bear",
+                "summary": "列出指定目录下的子目录"
+            },
+            {
                 "path": "/transfer/hook",
                 "endpoint": self.transfer_hook,
                 "methods": ["POST"],
@@ -573,6 +581,36 @@ class Seedkeeper(_PluginBase):
     def get_seed_dir(self) -> Dict[str, Any]:
         """获取全局默认做种目录"""
         return {"seed_dir": self._seed_dir}
+
+    def fs_ls(self, path: str = "/") -> Dict[str, Any]:
+        """
+        列出指定目录下的直接子目录，供前端目录浏览器使用。
+        参数 path 通过 query string 传入，如 ?path=/vol2/1000
+        """
+        try:
+            target = Path(path) if path else Path("/")
+            if not target.is_absolute():
+                target = Path("/") / target
+            if not target.exists() or not target.is_dir():
+                return {"path": str(target), "dirs": [], "error": "目录不存在或不可访问"}
+            dirs = []
+            try:
+                for entry in sorted(target.iterdir(), key=lambda e: e.name.lower()):
+                    if entry.is_dir() and not entry.name.startswith("."):
+                        dirs.append({
+                            "name": entry.name,
+                            "path": str(entry),
+                            "has_children": any(
+                                True for e in entry.iterdir()
+                                if e.is_dir() and not e.name.startswith(".")
+                            ) if os.access(str(entry), os.R_OK) else False
+                        })
+            except PermissionError:
+                return {"path": str(target), "dirs": [], "error": "权限不足"}
+            return {"path": str(target), "dirs": dirs}
+        except Exception as e:
+            logger.error(f"SeedKeeper fs_ls 失败: {e}")
+            return {"path": path, "dirs": [], "error": str(e)}
 
     def set_task_seed_dir(self, data: dict) -> Dict[str, Any]:
         """设置单个任务的做种目录，并立即通知下载器"""

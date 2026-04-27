@@ -1,4 +1,5 @@
 import { importShared } from './__federation_fn_import-JrT3xvdd.js';
+import { F as FolderBrowser } from './FolderBrowser-TFTRInSr.js';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-pcqpp-6-.js';
 
 const {defineComponent:_defineComponent} = await importShared('vue');
@@ -9,7 +10,6 @@ const _hoisted_1 = { class: "seedkeeper-config" };
 const _hoisted_2 = { class: "text-subtitle-2 mb-2 text-medium-emphasis" };
 const _hoisted_3 = { class: "d-flex gap-2" };
 const {ref,onMounted} = await importShared('vue');
-
 const _sfc_main = /* @__PURE__ */ _defineComponent({
   __name: "Config",
   props: {
@@ -20,6 +20,16 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
+    const dirBrowseDialog = ref(false);
+    const dirBrowseValue = ref("");
+    function openDirBrowse() {
+      dirBrowseValue.value = config.value.seed_dir || "";
+      dirBrowseDialog.value = true;
+    }
+    function onDirConfirm(path) {
+      config.value.seed_dir = path;
+      dirBrowseDialog.value = false;
+    }
     const config = ref({
       enabled: false,
       auto_seed: true,
@@ -60,11 +70,15 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
       const _component_v_row = _resolveComponent("v-row");
       const _component_v_divider = _resolveComponent("v-divider");
       const _component_v_icon = _resolveComponent("v-icon");
-      const _component_v_alert = _resolveComponent("v-alert");
       const _component_v_btn = _resolveComponent("v-btn");
+      const _component_v_alert = _resolveComponent("v-alert");
       const _component_v_spacer = _resolveComponent("v-spacer");
+      const _component_v_card_title = _resolveComponent("v-card-title");
+      const _component_v_card_text = _resolveComponent("v-card-text");
+      const _component_v_card = _resolveComponent("v-card");
+      const _component_v_dialog = _resolveComponent("v-dialog");
       return _openBlock(), _createElementBlock("div", _hoisted_1, [
-        _cache[17] || (_cache[17] = _createElementVNode("div", { class: "text-h6 mb-4" }, "SeedKeeper 做种助手 - 配置", -1)),
+        _cache[23] || (_cache[23] = _createElementVNode("div", { class: "text-h6 mb-4" }, "SeedKeeper 做种助手 - 配置", -1)),
         _createVNode(_component_v_switch, {
           modelValue: config.value.enabled,
           "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => config.value.enabled = $event),
@@ -179,12 +193,12 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             size: "small",
             class: "mr-1"
           }, {
-            default: _withCtx(() => [..._cache[10] || (_cache[10] = [
+            default: _withCtx(() => [..._cache[13] || (_cache[13] = [
               _createTextVNode("mdi-folder-open", -1)
             ])]),
             _: 1
           }),
-          _cache[11] || (_cache[11] = _createTextVNode(" 做种目录设置 ", -1))
+          _cache[14] || (_cache[14] = _createTextVNode(" 做种目录设置 ", -1))
         ]),
         _createVNode(_component_v_text_field, {
           modelValue: config.value.seed_dir,
@@ -198,7 +212,30 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
           clearable: "",
           disabled: !config.value.enabled,
           class: "mb-2"
-        }, null, 8, ["modelValue", "disabled"]),
+        }, {
+          "append-inner": _withCtx(() => [
+            _createVNode(_component_v_btn, {
+              icon: "",
+              size: "x-small",
+              variant: "text",
+              color: "primary",
+              disabled: !config.value.enabled,
+              title: "浏览目录",
+              onClick: openDirBrowse
+            }, {
+              default: _withCtx(() => [
+                _createVNode(_component_v_icon, { size: "16" }, {
+                  default: _withCtx(() => [..._cache[15] || (_cache[15] = [
+                    _createTextVNode("mdi-folder-search", -1)
+                  ])]),
+                  _: 1
+                })
+              ]),
+              _: 1
+            }, 8, ["disabled"])
+          ]),
+          _: 1
+        }, 8, ["modelValue", "disabled"]),
         config.value.seed_dir ? (_openBlock(), _createBlock(_component_v_alert, {
           key: 0,
           type: "info",
@@ -207,9 +244,9 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
           class: "mb-4"
         }, {
           default: _withCtx(() => [
-            _cache[12] || (_cache[12] = _createTextVNode(" 转移完成后，种子保存路径将自动切换到 ", -1)),
+            _cache[16] || (_cache[16] = _createTextVNode(" 转移完成后，种子保存路径将自动切换到 ", -1)),
             _createElementVNode("strong", null, _toDisplayString(config.value.seed_dir), 1),
-            _cache[13] || (_cache[13] = _createTextVNode("，以便继续做种上传。 每个任务也可在任务列表中单独覆盖此目录。 ", -1))
+            _cache[17] || (_cache[17] = _createTextVNode("，以便继续做种上传。 每个任务也可在任务列表中单独覆盖此目录。 ", -1))
           ]),
           _: 1
         })) : _createCommentVNode("", true),
@@ -220,7 +257,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             onClick: saveConfig,
             disabled: !config.value.enabled
           }, {
-            default: _withCtx(() => [..._cache[14] || (_cache[14] = [
+            default: _withCtx(() => [..._cache[18] || (_cache[18] = [
               _createTextVNode(" 保存配置 ", -1)
             ])]),
             _: 1
@@ -229,7 +266,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             variant: "text",
             onClick: switchToDetail
           }, {
-            default: _withCtx(() => [..._cache[15] || (_cache[15] = [
+            default: _withCtx(() => [..._cache[19] || (_cache[19] = [
               _createTextVNode(" 查看详情 ", -1)
             ])]),
             _: 1
@@ -239,17 +276,60 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             variant: "text",
             onClick: _cache[9] || (_cache[9] = ($event) => emit("close"))
           }, {
-            default: _withCtx(() => [..._cache[16] || (_cache[16] = [
+            default: _withCtx(() => [..._cache[20] || (_cache[20] = [
               _createTextVNode(" 关闭 ", -1)
             ])]),
             _: 1
           })
-        ])
+        ]),
+        _createVNode(_component_v_dialog, {
+          modelValue: dirBrowseDialog.value,
+          "onUpdate:modelValue": _cache[12] || (_cache[12] = ($event) => dirBrowseDialog.value = $event),
+          "max-width": "560",
+          persistent: ""
+        }, {
+          default: _withCtx(() => [
+            _createVNode(_component_v_card, null, {
+              default: _withCtx(() => [
+                _createVNode(_component_v_card_title, { class: "d-flex align-center pb-1" }, {
+                  default: _withCtx(() => [
+                    _createVNode(_component_v_icon, {
+                      class: "mr-2",
+                      color: "primary"
+                    }, {
+                      default: _withCtx(() => [..._cache[21] || (_cache[21] = [
+                        _createTextVNode("mdi-folder-search", -1)
+                      ])]),
+                      _: 1
+                    }),
+                    _cache[22] || (_cache[22] = _createTextVNode(" 选择默认做种目录 ", -1))
+                  ]),
+                  _: 1
+                }),
+                _createVNode(_component_v_card_text, null, {
+                  default: _withCtx(() => [
+                    _createVNode(FolderBrowser, {
+                      api: props.api,
+                      modelValue: dirBrowseValue.value,
+                      "onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => dirBrowseValue.value = $event),
+                      "initial-path": dirBrowseValue.value || "/",
+                      onConfirm: onDirConfirm,
+                      onCancel: _cache[11] || (_cache[11] = ($event) => dirBrowseDialog.value = false)
+                    }, null, 8, ["api", "modelValue", "initial-path"])
+                  ]),
+                  _: 1
+                })
+              ]),
+              _: 1
+            })
+          ]),
+          _: 1
+        }, 8, ["modelValue"])
       ]);
     };
   }
 });
 
-const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-0fbb9b52"]]);
+const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-c6d9aebe"]]);
 
 export { Config as default };

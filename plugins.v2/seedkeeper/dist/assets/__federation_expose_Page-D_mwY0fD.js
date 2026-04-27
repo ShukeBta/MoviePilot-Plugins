@@ -1,4 +1,5 @@
 import { importShared } from './__federation_fn_import-JrT3xvdd.js';
+import { F as FolderBrowser } from './FolderBrowser-TFTRInSr.js';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-pcqpp-6-.js';
 
 const {defineComponent:_defineComponent} = await importShared('vue');
@@ -14,10 +15,9 @@ const _hoisted_6 = { class: "text-h4" };
 const _hoisted_7 = { class: "d-flex align-center" };
 const _hoisted_8 = {
   key: 0,
-  class: "text-caption text-medium-emphasis mb-3"
+  class: "text-caption text-medium-emphasis mb-3 d-flex align-center"
 };
 const {ref,onMounted} = await importShared('vue');
-
 const _sfc_main = /* @__PURE__ */ _defineComponent({
   __name: "Page",
   props: {
@@ -35,6 +35,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
     const dirDialogValue = ref("");
     const dirDialogLoading = ref(false);
     const dirDialogMsg = ref("");
+    const dirInputTab = ref("browse");
     const globalSeedDir = ref("");
     onMounted(async () => {
       await loadData();
@@ -97,7 +98,11 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
       dirDialogTask.value = task;
       dirDialogValue.value = task.seed_dir || "";
       dirDialogMsg.value = "";
+      dirInputTab.value = "browse";
       dirDialog.value = true;
+    }
+    function onBrowserConfirm(path) {
+      dirDialogValue.value = path;
     }
     async function submitDirChange() {
       if (!dirDialogTask.value) return;
@@ -162,7 +167,11 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
       const _component_v_tooltip = _resolveComponent("v-tooltip");
       const _component_v_chip = _resolveComponent("v-chip");
       const _component_v_data_table = _resolveComponent("v-data-table");
+      const _component_v_tab = _resolveComponent("v-tab");
+      const _component_v_tabs = _resolveComponent("v-tabs");
+      const _component_v_window_item = _resolveComponent("v-window-item");
       const _component_v_text_field = _resolveComponent("v-text-field");
+      const _component_v_window = _resolveComponent("v-window");
       const _component_v_alert = _resolveComponent("v-alert");
       const _component_v_card_actions = _resolveComponent("v-card-actions");
       const _component_v_dialog = _resolveComponent("v-dialog");
@@ -180,12 +189,12 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                 size: "small",
                 class: "mr-1"
               }, {
-                default: _withCtx(() => [..._cache[3] || (_cache[3] = [
+                default: _withCtx(() => [..._cache[7] || (_cache[7] = [
                   _createTextVNode("mdi-refresh", -1)
                 ])]),
                 _: 1
               }),
-              _cache[4] || (_cache[4] = _createTextVNode("刷新 ", -1))
+              _cache[8] || (_cache[8] = _createTextVNode("刷新 ", -1))
             ]),
             _: 1
           }, 8, ["loading"]),
@@ -199,12 +208,12 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                 size: "small",
                 class: "mr-1"
               }, {
-                default: _withCtx(() => [..._cache[5] || (_cache[5] = [
+                default: _withCtx(() => [..._cache[9] || (_cache[9] = [
                   _createTextVNode("mdi-cog", -1)
                 ])]),
                 _: 1
               }),
-              _cache[6] || (_cache[6] = _createTextVNode("配置 ", -1))
+              _cache[10] || (_cache[10] = _createTextVNode("配置 ", -1))
             ]),
             _: 1
           }),
@@ -212,7 +221,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             size: "small",
             onClick: notifyClose
           }, {
-            default: _withCtx(() => [..._cache[7] || (_cache[7] = [
+            default: _withCtx(() => [..._cache[11] || (_cache[11] = [
               _createTextVNode("关闭", -1)
             ])]),
             _: 1
@@ -230,7 +239,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                     _createVNode(_component_v_card_text, { class: "text-center pa-2" }, {
                       default: _withCtx(() => [
                         _createElementVNode("div", _hoisted_3, _toDisplayString(stats.value.total), 1),
-                        _cache[8] || (_cache[8] = _createElementVNode("div", { class: "text-caption" }, "总计", -1))
+                        _cache[12] || (_cache[12] = _createElementVNode("div", { class: "text-caption" }, "总计", -1))
                       ]),
                       _: 1
                     })
@@ -250,7 +259,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                     _createVNode(_component_v_card_text, { class: "text-center pa-2" }, {
                       default: _withCtx(() => [
                         _createElementVNode("div", _hoisted_4, _toDisplayString(stats.value.active), 1),
-                        _cache[9] || (_cache[9] = _createElementVNode("div", { class: "text-caption" }, "做种中", -1))
+                        _cache[13] || (_cache[13] = _createElementVNode("div", { class: "text-caption" }, "做种中", -1))
                       ]),
                       _: 1
                     })
@@ -270,7 +279,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                     _createVNode(_component_v_card_text, { class: "text-center pa-2" }, {
                       default: _withCtx(() => [
                         _createElementVNode("div", _hoisted_5, _toDisplayString(stats.value.completed), 1),
-                        _cache[10] || (_cache[10] = _createElementVNode("div", { class: "text-caption" }, "已完成", -1))
+                        _cache[14] || (_cache[14] = _createElementVNode("div", { class: "text-caption" }, "已完成", -1))
                       ]),
                       _: 1
                     })
@@ -290,7 +299,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                     _createVNode(_component_v_card_text, { class: "text-center pa-2" }, {
                       default: _withCtx(() => [
                         _createElementVNode("div", _hoisted_6, _toDisplayString(stats.value.pending), 1),
-                        _cache[11] || (_cache[11] = _createElementVNode("div", { class: "text-caption" }, "等待中", -1))
+                        _cache[15] || (_cache[15] = _createElementVNode("div", { class: "text-caption" }, "等待中", -1))
                       ]),
                       _: 1
                     })
@@ -308,12 +317,12 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             _createVNode(_component_v_card_title, { class: "d-flex align-center" }, {
               default: _withCtx(() => [
                 _createVNode(_component_v_icon, { class: "mr-2" }, {
-                  default: _withCtx(() => [..._cache[12] || (_cache[12] = [
+                  default: _withCtx(() => [..._cache[16] || (_cache[16] = [
                     _createTextVNode("mdi-sprout", -1)
                   ])]),
                   _: 1
                 }),
-                _cache[14] || (_cache[14] = _createElementVNode("span", null, "做种任务列表", -1)),
+                _cache[18] || (_cache[18] = _createElementVNode("span", null, "做种任务列表", -1)),
                 _createVNode(_component_v_spacer),
                 _createVNode(_component_v_btn, {
                   icon: "",
@@ -323,7 +332,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                 }, {
                   default: _withCtx(() => [
                     _createVNode(_component_v_icon, null, {
-                      default: _withCtx(() => [..._cache[13] || (_cache[13] = [
+                      default: _withCtx(() => [..._cache[17] || (_cache[17] = [
                         _createTextVNode("mdi-refresh", -1)
                       ])]),
                       _: 1
@@ -348,12 +357,12 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   size: "48",
                   class: "mb-2 text-grey-lighten-1"
                 }, {
-                  default: _withCtx(() => [..._cache[15] || (_cache[15] = [
+                  default: _withCtx(() => [..._cache[19] || (_cache[19] = [
                     _createTextVNode("mdi-sprout-outline", -1)
                   ])]),
                   _: 1
                 }),
-                _cache[16] || (_cache[16] = _createElementVNode("div", null, "暂无做种任务", -1))
+                _cache[20] || (_cache[20] = _createElementVNode("div", null, "暂无做种任务", -1))
               ]),
               _: 1
             })) : (_openBlock(), _createBlock(_component_v_data_table, {
@@ -405,7 +414,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   }, {
                     default: _withCtx(() => [
                       _createVNode(_component_v_icon, { size: "14" }, {
-                        default: _withCtx(() => [..._cache[17] || (_cache[17] = [
+                        default: _withCtx(() => [..._cache[21] || (_cache[21] = [
                           _createTextVNode("mdi-pencil-outline", -1)
                         ])]),
                         _: 1
@@ -441,8 +450,8 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   variant: "text",
                   onClick: ($event) => resumeTask(item.hash)
                 }, {
-                  default: _withCtx(() => [..._cache[18] || (_cache[18] = [
-                    _createTextVNode(" 恢复 ", -1)
+                  default: _withCtx(() => [..._cache[22] || (_cache[22] = [
+                    _createTextVNode("恢复", -1)
                   ])]),
                   _: 1
                 }, 8, ["onClick"])) : _createCommentVNode("", true),
@@ -453,8 +462,8 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   variant: "text",
                   onClick: ($event) => pauseTask(item.hash)
                 }, {
-                  default: _withCtx(() => [..._cache[19] || (_cache[19] = [
-                    _createTextVNode(" 暂停 ", -1)
+                  default: _withCtx(() => [..._cache[23] || (_cache[23] = [
+                    _createTextVNode("暂停", -1)
                   ])]),
                   _: 1
                 }, 8, ["onClick"])) : _createCommentVNode("", true),
@@ -469,12 +478,12 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                       size: "14",
                       class: "mr-1"
                     }, {
-                      default: _withCtx(() => [..._cache[20] || (_cache[20] = [
+                      default: _withCtx(() => [..._cache[24] || (_cache[24] = [
                         _createTextVNode("mdi-folder-edit", -1)
                       ])]),
                       _: 1
                     }),
-                    _cache[21] || (_cache[21] = _createTextVNode("目录 ", -1))
+                    _cache[25] || (_cache[25] = _createTextVNode("目录 ", -1))
                   ]),
                   _: 1
                 }, 8, ["onClick"]),
@@ -484,8 +493,8 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   variant: "text",
                   onClick: ($event) => removeTask(item.hash)
                 }, {
-                  default: _withCtx(() => [..._cache[22] || (_cache[22] = [
-                    _createTextVNode(" 删除 ", -1)
+                  default: _withCtx(() => [..._cache[26] || (_cache[26] = [
+                    _createTextVNode("删除", -1)
                   ])]),
                   _: 1
                 }, 8, ["onClick"])
@@ -497,54 +506,120 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
         }),
         _createVNode(_component_v_dialog, {
           modelValue: dirDialog.value,
-          "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => dirDialog.value = $event),
-          "max-width": "500",
+          "onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => dirDialog.value = $event),
+          "max-width": "560",
           persistent: ""
         }, {
           default: _withCtx(() => [
             _createVNode(_component_v_card, null, {
               default: _withCtx(() => [
-                _createVNode(_component_v_card_title, { class: "d-flex align-center" }, {
+                _createVNode(_component_v_card_title, { class: "d-flex align-center pb-1" }, {
                   default: _withCtx(() => [
                     _createVNode(_component_v_icon, {
                       class: "mr-2",
                       color: "primary"
                     }, {
-                      default: _withCtx(() => [..._cache[23] || (_cache[23] = [
+                      default: _withCtx(() => [..._cache[27] || (_cache[27] = [
                         _createTextVNode("mdi-folder-edit", -1)
                       ])]),
                       _: 1
                     }),
-                    _cache[24] || (_cache[24] = _createTextVNode(" 修改做种目录 ", -1))
+                    _cache[28] || (_cache[28] = _createTextVNode(" 选择做种目录 ", -1))
                   ]),
                   _: 1
                 }),
-                _createVNode(_component_v_card_text, null, {
+                _createVNode(_component_v_card_text, { class: "pb-1" }, {
                   default: _withCtx(() => [
                     dirDialogTask.value ? (_openBlock(), _createElementBlock("div", _hoisted_8, [
                       _createVNode(_component_v_icon, {
                         size: "14",
                         class: "mr-1"
                       }, {
-                        default: _withCtx(() => [..._cache[25] || (_cache[25] = [
+                        default: _withCtx(() => [..._cache[29] || (_cache[29] = [
                           _createTextVNode("mdi-seed", -1)
                         ])]),
                         _: 1
                       }),
                       _createTextVNode(" " + _toDisplayString(dirDialogTask.value.name || dirDialogTask.value.hash), 1)
                     ])) : _createCommentVNode("", true),
-                    _createVNode(_component_v_text_field, {
-                      modelValue: dirDialogValue.value,
-                      "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => dirDialogValue.value = $event),
-                      label: "做种目录路径",
+                    _createVNode(_component_v_tabs, {
+                      modelValue: dirInputTab.value,
+                      "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => dirInputTab.value = $event),
                       density: "compact",
-                      placeholder: globalSeedDir.value || "例如：/vol2/1000/qBittorrent/seeding",
-                      "prepend-inner-icon": "mdi-folder-outline",
-                      clearable: "",
-                      autofocus: "",
-                      hint: "设置后将立即通知下载器切换该种子的保存路径，留空则恢复为默认",
-                      "persistent-hint": ""
-                    }, null, 8, ["modelValue", "placeholder"]),
+                      class: "mb-3"
+                    }, {
+                      default: _withCtx(() => [
+                        _createVNode(_component_v_tab, { value: "browse" }, {
+                          default: _withCtx(() => [
+                            _createVNode(_component_v_icon, {
+                              size: "16",
+                              class: "mr-1"
+                            }, {
+                              default: _withCtx(() => [..._cache[30] || (_cache[30] = [
+                                _createTextVNode("mdi-folder-open", -1)
+                              ])]),
+                              _: 1
+                            }),
+                            _cache[31] || (_cache[31] = _createTextVNode("浏览目录 ", -1))
+                          ]),
+                          _: 1
+                        }),
+                        _createVNode(_component_v_tab, { value: "input" }, {
+                          default: _withCtx(() => [
+                            _createVNode(_component_v_icon, {
+                              size: "16",
+                              class: "mr-1"
+                            }, {
+                              default: _withCtx(() => [..._cache[32] || (_cache[32] = [
+                                _createTextVNode("mdi-pencil", -1)
+                              ])]),
+                              _: 1
+                            }),
+                            _cache[33] || (_cache[33] = _createTextVNode("手动输入 ", -1))
+                          ]),
+                          _: 1
+                        })
+                      ]),
+                      _: 1
+                    }, 8, ["modelValue"]),
+                    _createVNode(_component_v_window, {
+                      modelValue: dirInputTab.value,
+                      "onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => dirInputTab.value = $event)
+                    }, {
+                      default: _withCtx(() => [
+                        _createVNode(_component_v_window_item, { value: "browse" }, {
+                          default: _withCtx(() => [
+                            _createVNode(FolderBrowser, {
+                              api: props.api,
+                              modelValue: dirDialogValue.value,
+                              "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => dirDialogValue.value = $event),
+                              "initial-path": dirDialogValue.value || globalSeedDir.value || "/",
+                              onConfirm: onBrowserConfirm,
+                              onCancel: _cache[2] || (_cache[2] = ($event) => dirDialog.value = false)
+                            }, null, 8, ["api", "modelValue", "initial-path"])
+                          ]),
+                          _: 1
+                        }),
+                        _createVNode(_component_v_window_item, { value: "input" }, {
+                          default: _withCtx(() => [
+                            _createVNode(_component_v_text_field, {
+                              modelValue: dirDialogValue.value,
+                              "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => dirDialogValue.value = $event),
+                              label: "做种目录路径",
+                              density: "compact",
+                              placeholder: globalSeedDir.value || "例如：/vol2/1000/qBittorrent/seeding",
+                              "prepend-inner-icon": "mdi-folder-outline",
+                              clearable: "",
+                              autofocus: "",
+                              hint: "设置后将立即通知下载器切换该种子的保存路径，留空则恢复为默认",
+                              "persistent-hint": ""
+                            }, null, 8, ["modelValue", "placeholder"])
+                          ]),
+                          _: 1
+                        })
+                      ]),
+                      _: 1
+                    }, 8, ["modelValue"]),
                     dirDialogMsg.value ? (_openBlock(), _createBlock(_component_v_alert, {
                       key: 1,
                       type: dirDialogMsg.value.includes("失败") ? "error" : "success",
@@ -565,10 +640,10 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                     _createVNode(_component_v_spacer),
                     _createVNode(_component_v_btn, {
                       variant: "text",
-                      onClick: _cache[1] || (_cache[1] = ($event) => dirDialog.value = false),
+                      onClick: _cache[5] || (_cache[5] = ($event) => dirDialog.value = false),
                       disabled: dirDialogLoading.value
                     }, {
-                      default: _withCtx(() => [..._cache[26] || (_cache[26] = [
+                      default: _withCtx(() => [..._cache[34] || (_cache[34] = [
                         _createTextVNode("取消", -1)
                       ])]),
                       _: 1
@@ -577,13 +652,14 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                       color: "primary",
                       variant: "flat",
                       onClick: submitDirChange,
-                      loading: dirDialogLoading.value
+                      loading: dirDialogLoading.value,
+                      disabled: !dirDialogValue.value
                     }, {
-                      default: _withCtx(() => [..._cache[27] || (_cache[27] = [
+                      default: _withCtx(() => [..._cache[35] || (_cache[35] = [
                         _createTextVNode(" 确认应用 ", -1)
                       ])]),
                       _: 1
-                    }, 8, ["loading"])
+                    }, 8, ["loading", "disabled"])
                   ]),
                   _: 1
                 })
@@ -598,6 +674,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
   }
 });
 
-const Page = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-e71a91fd"]]);
+const Page = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-0b94766c"]]);
 
 export { Page as default };

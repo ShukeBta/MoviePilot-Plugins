@@ -1,5 +1,5 @@
 {
-  "seedkeeper": {
+  "Seedkeeper": {
     "name": "SeedKeeper",
     "description": "做种助手 - 智能管理 MoviePilot 转移后的种子做种任务，解决转移后 qBittorrent 无法做种和硬链接失败的问题",
     "labels": "做种,下载管理,自动化",
@@ -18,7 +18,7 @@
       }
     ]
   },
-  "shukguangyadisk": {
+  "ShukGuangYaDisk": {
     "name": "Shuk-光鸭云盘",
     "description": "将光鸭云盘挂载为 MoviePilot / Emby 存储介质，支持扫码登录、文件浏览、上传下载、WebDAV 挂载（Emby 直连）。",
     "labels": "云盘,存储,WebDAV,Emby直连",

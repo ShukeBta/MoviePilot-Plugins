@@ -1,0 +1,11 @@
+
+.seedkeeper-page[data-v-e71a91fd] {
+  padding: 16px;
+}
+.dir-cell[data-v-e71a91fd] {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}

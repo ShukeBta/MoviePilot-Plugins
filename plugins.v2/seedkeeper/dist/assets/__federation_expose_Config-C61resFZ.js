@@ -3,10 +3,11 @@ import { _ as _export_sfc } from './_plugin-vue_export-helper-pcqpp-6-.js';
 
 const {defineComponent:_defineComponent} = await importShared('vue');
 
-const {createElementVNode:_createElementVNode,resolveComponent:_resolveComponent,createVNode:_createVNode,withCtx:_withCtx,createTextVNode:_createTextVNode,openBlock:_openBlock,createElementBlock:_createElementBlock} = await importShared('vue');
+const {createElementVNode:_createElementVNode,resolveComponent:_resolveComponent,createVNode:_createVNode,withCtx:_withCtx,createTextVNode:_createTextVNode,toDisplayString:_toDisplayString,openBlock:_openBlock,createBlock:_createBlock,createCommentVNode:_createCommentVNode,createElementBlock:_createElementBlock} = await importShared('vue');
 
 const _hoisted_1 = { class: "seedkeeper-config" };
-const _hoisted_2 = { class: "d-flex gap-2" };
+const _hoisted_2 = { class: "text-subtitle-2 mb-2 text-medium-emphasis" };
+const _hoisted_3 = { class: "d-flex gap-2" };
 const {ref,onMounted} = await importShared('vue');
 
 const _sfc_main = /* @__PURE__ */ _defineComponent({
@@ -27,7 +28,8 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
       max_ratio: 5,
       seed_time_limit: 0,
       remove_on_limit: false,
-      downloaders: []
+      downloaders: [],
+      seed_dir: ""
     });
     const strategies = [
       { title: "按分享率", value: "ratio" },
@@ -57,10 +59,12 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
       const _component_v_col = _resolveComponent("v-col");
       const _component_v_row = _resolveComponent("v-row");
       const _component_v_divider = _resolveComponent("v-divider");
+      const _component_v_icon = _resolveComponent("v-icon");
+      const _component_v_alert = _resolveComponent("v-alert");
       const _component_v_btn = _resolveComponent("v-btn");
       const _component_v_spacer = _resolveComponent("v-spacer");
       return _openBlock(), _createElementBlock("div", _hoisted_1, [
-        _cache[12] || (_cache[12] = _createElementVNode("div", { class: "text-h6 mb-4" }, "SeedKeeper 做种助手 - 配置", -1)),
+        _cache[17] || (_cache[17] = _createElementVNode("div", { class: "text-h6 mb-4" }, "SeedKeeper 做种助手 - 配置", -1)),
         _createVNode(_component_v_switch, {
           modelValue: config.value.enabled,
           "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => config.value.enabled = $event),
@@ -171,12 +175,52 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
         }, null, 8, ["modelValue", "disabled"]),
         _createVNode(_component_v_divider, { class: "my-4" }),
         _createElementVNode("div", _hoisted_2, [
+          _createVNode(_component_v_icon, {
+            size: "small",
+            class: "mr-1"
+          }, {
+            default: _withCtx(() => [..._cache[10] || (_cache[10] = [
+              _createTextVNode("mdi-folder-open", -1)
+            ])]),
+            _: 1
+          }),
+          _cache[11] || (_cache[11] = _createTextVNode(" 做种目录设置 ", -1))
+        ]),
+        _createVNode(_component_v_text_field, {
+          modelValue: config.value.seed_dir,
+          "onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => config.value.seed_dir = $event),
+          label: "默认做种目录",
+          density: "compact",
+          hint: "转移完成后种子使用此目录继续上传做种。留空则保持下载器原始保存路径不变。",
+          "persistent-hint": "",
+          placeholder: "例如：/vol2/1000/qBittorrent/seeding",
+          "prepend-inner-icon": "mdi-folder-outline",
+          clearable: "",
+          disabled: !config.value.enabled,
+          class: "mb-2"
+        }, null, 8, ["modelValue", "disabled"]),
+        config.value.seed_dir ? (_openBlock(), _createBlock(_component_v_alert, {
+          key: 0,
+          type: "info",
+          variant: "tonal",
+          density: "compact",
+          class: "mb-4"
+        }, {
+          default: _withCtx(() => [
+            _cache[12] || (_cache[12] = _createTextVNode(" 转移完成后，种子保存路径将自动切换到 ", -1)),
+            _createElementVNode("strong", null, _toDisplayString(config.value.seed_dir), 1),
+            _cache[13] || (_cache[13] = _createTextVNode("，以便继续做种上传。 每个任务也可在任务列表中单独覆盖此目录。 ", -1))
+          ]),
+          _: 1
+        })) : _createCommentVNode("", true),
+        _createVNode(_component_v_divider, { class: "my-4" }),
+        _createElementVNode("div", _hoisted_3, [
           _createVNode(_component_v_btn, {
             color: "primary",
             onClick: saveConfig,
             disabled: !config.value.enabled
           }, {
-            default: _withCtx(() => [..._cache[9] || (_cache[9] = [
+            default: _withCtx(() => [..._cache[14] || (_cache[14] = [
               _createTextVNode(" 保存配置 ", -1)
             ])]),
             _: 1
@@ -185,7 +229,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             variant: "text",
             onClick: switchToDetail
           }, {
-            default: _withCtx(() => [..._cache[10] || (_cache[10] = [
+            default: _withCtx(() => [..._cache[15] || (_cache[15] = [
               _createTextVNode(" 查看详情 ", -1)
             ])]),
             _: 1
@@ -193,9 +237,9 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
           _createVNode(_component_v_spacer),
           _createVNode(_component_v_btn, {
             variant: "text",
-            onClick: _cache[8] || (_cache[8] = ($event) => emit("close"))
+            onClick: _cache[9] || (_cache[9] = ($event) => emit("close"))
           }, {
-            default: _withCtx(() => [..._cache[11] || (_cache[11] = [
+            default: _withCtx(() => [..._cache[16] || (_cache[16] = [
               _createTextVNode(" 关闭 ", -1)
             ])]),
             _: 1
@@ -206,6 +250,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
   }
 });
 
-const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-a49af02a"]]);
+const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-0fbb9b52"]]);
 
 export { Config as default };

@@ -19,9 +19,9 @@ class Seedkeeper(_PluginBase):
     
     # ==================== 插件元数据 ====================
     plugin_name = "SeedKeeper"
-    plugin_desc = "做种助手 - 智能管理转移后的种子做种任务"
+    plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.0.0"
+    plugin_version = "1.1.0"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
@@ -63,6 +63,8 @@ class Seedkeeper(_PluginBase):
     _remove_on_limit: bool = False
     _strategy: str = "ratio"
     _downloaders: List[str] = []
+    # 全局默认做种目录（转移后若无单独设置则使用此目录做种）
+    _seed_dir: str = ""
 
     # ==================== 初始化 ====================
     def init_plugin(self, config: dict = None) -> None:
@@ -76,7 +78,8 @@ class Seedkeeper(_PluginBase):
             self._remove_on_limit = config.get("remove_on_limit", False)
             self._strategy = config.get("strategy", "ratio")
             self._downloaders = config.get("downloaders", [])
-        logger.info(f"SeedKeeper 插件初始化完成，auto_seed={self._auto_seed}")
+            self._seed_dir = config.get("seed_dir", "").strip()
+        logger.info(f"SeedKeeper 插件初始化完成，auto_seed={self._auto_seed}, seed_dir={self._seed_dir}")
 
     # ==================== 状态管理 ====================
     def get_state(self) -> bool:
@@ -177,6 +180,17 @@ class Seedkeeper(_PluginBase):
                     "persistent-hint": True,
                 },
                 "model": "downloaders"
+            },
+            {
+                "component": "VTextField",
+                "props": {
+                    "label": "默认做种目录",
+                    "hint": "转移后做种使用的目录（如 /downloads/seeding），留空则使用下载器原始保存路径",
+                    "persistent-hint": True,
+                    "placeholder": "例如：/vol2/1000/qBittorrent/seeding",
+                    "clearable": True,
+                },
+                "model": "seed_dir"
             }
         ], {
             "enabled": False,
@@ -186,7 +200,8 @@ class Seedkeeper(_PluginBase):
             "max_ratio": 5.0,
             "seed_time_limit": 0,
             "remove_on_limit": False,
-            "downloaders": []
+            "downloaders": [],
+            "seed_dir": ""
         }
 
     # ==================== 详情页面 ====================
@@ -339,6 +354,20 @@ class Seedkeeper(_PluginBase):
                 "summary": "删除种子"
             },
             {
+                "path": "/task/set_seed_dir",
+                "endpoint": self.set_task_seed_dir,
+                "methods": ["POST"],
+                "auth": "bear",
+                "summary": "设置任务做种目录"
+            },
+            {
+                "path": "/config/seed_dir",
+                "endpoint": self.get_seed_dir,
+                "methods": ["GET"],
+                "auth": "bear",
+                "summary": "获取全局默认做种目录"
+            },
+            {
                 "path": "/transfer/hook",
                 "endpoint": self.transfer_hook,
                 "methods": ["POST"],
@@ -400,12 +429,20 @@ class Seedkeeper(_PluginBase):
         
         if self._should_keep_seeding():
             tasks = self.get_data("tasks") or {}
+            # 确定实际做种目录：优先用任务已有设置，其次全局默认，最后原始路径
+            effective_seed_dir = self._seed_dir if self._seed_dir else src_path
             if torrent_hash and torrent_hash in tasks:
                 tasks[torrent_hash]["src_path"] = src_path
                 tasks[torrent_hash]["dest_path"] = dest_path
                 tasks[torrent_hash]["keep_source"] = True
+                # 若任务尚未设置过自定义目录，使用全局默认
+                if not tasks[torrent_hash].get("seed_dir"):
+                    tasks[torrent_hash]["seed_dir"] = effective_seed_dir
                 self.save_data("tasks", tasks)
-                logger.info(f"SeedKeeper: 标记任务需要保留做种 {torrent_hash}")
+                logger.info(f"SeedKeeper: 标记任务需要保留做种 {torrent_hash}, seed_dir={tasks[torrent_hash].get('seed_dir')}")
+                # 实际通知下载器切换保存路径
+                if tasks[torrent_hash].get("seed_dir"):
+                    self._apply_seed_dir(torrent_hash, tasks[torrent_hash]["seed_dir"])
             else:
                 task_info = {
                     "hash": torrent_hash,
@@ -413,10 +450,13 @@ class Seedkeeper(_PluginBase):
                     "dest_path": dest_path,
                     "status": "seeding",
                     "keep_source": True,
-                    "added_time": datetime.now().isoformat()
+                    "added_time": datetime.now().isoformat(),
+                    "seed_dir": effective_seed_dir
                 }
                 tasks[torrent_hash] = task_info
                 self.save_data("tasks", tasks)
+                if effective_seed_dir:
+                    self._apply_seed_dir(torrent_hash, effective_seed_dir)
 
     def _ensure_seeding(self, download_info: dict) -> None:
         """确保种子继续做种"""
@@ -442,6 +482,27 @@ class Seedkeeper(_PluginBase):
                 logger.info(f"SeedKeeper: 已设置 {torrent_hash} 为做种模式")
         except Exception as e:
             logger.error(f"SeedKeeper: 发送做种命令失败 {e}")
+
+    def _apply_seed_dir(self, torrent_hash: str, seed_dir: str) -> None:
+        """通知下载器将种子保存路径切换到指定做种目录"""
+        if not torrent_hash or not seed_dir:
+            return
+        try:
+            from app.helper.downloader import DownloaderHelper
+            downloader = DownloaderHelper()
+            service = downloader.get_service()
+            if service:
+                # 尝试调用 set_torrent_location，qBittorrent 支持此接口
+                if hasattr(service, "set_torrent_location"):
+                    service.set_torrent_location(torrent_hash, seed_dir)
+                    logger.info(f"SeedKeeper: 已将 {torrent_hash} 做种目录切换为 {seed_dir}")
+                elif hasattr(service, "move_torrent_file"):
+                    service.move_torrent_file(torrent_hash, seed_dir)
+                    logger.info(f"SeedKeeper: 已移动 {torrent_hash} 至 {seed_dir}")
+                else:
+                    logger.warning(f"SeedKeeper: 下载器不支持更改保存路径，torrent={torrent_hash}")
+        except Exception as e:
+            logger.error(f"SeedKeeper: 切换做种目录失败 {e}")
 
     # ==================== API 实现 ====================
     def get_stats(self) -> Dict[str, Any]:
@@ -508,6 +569,31 @@ class Seedkeeper(_PluginBase):
             return {"success": True, "message": "种子已删除"}
         
         return {"success": False, "message": "任务不存在"}
+
+    def get_seed_dir(self) -> Dict[str, Any]:
+        """获取全局默认做种目录"""
+        return {"seed_dir": self._seed_dir}
+
+    def set_task_seed_dir(self, data: dict) -> Dict[str, Any]:
+        """设置单个任务的做种目录，并立即通知下载器"""
+        torrent_hash = data.get("hash")
+        seed_dir = (data.get("seed_dir") or "").strip()
+        if not torrent_hash:
+            return {"success": False, "message": "缺少 hash 参数"}
+
+        tasks = self.get_data("tasks") or {}
+        if torrent_hash not in tasks:
+            return {"success": False, "message": "任务不存在"}
+
+        old_dir = tasks[torrent_hash].get("seed_dir", "")
+        tasks[torrent_hash]["seed_dir"] = seed_dir
+        self.save_data("tasks", tasks)
+        logger.info(f"SeedKeeper: 任务 {torrent_hash} 做种目录 {old_dir} → {seed_dir}")
+
+        if seed_dir:
+            self._apply_seed_dir(torrent_hash, seed_dir)
+
+        return {"success": True, "message": f"做种目录已更新为 {seed_dir or '（默认）'}"}
 
     def transfer_hook(self, data: dict) -> Dict[str, Any]:
         """转移完成回调"""

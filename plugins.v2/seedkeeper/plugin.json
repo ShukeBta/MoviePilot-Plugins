@@ -1,12 +1,17 @@
 {
   "name": "SeedKeeper",
   "description": "做种助手 - 智能管理 MoviePilot 转移后的种子做种任务，解决转移后 qBittorrent 无法做种和硬链接失败的问题",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "icon": "seedkeeper.png",
   "author": "ShukeBta",
   "level": 1,
   "vue": true,
   "history": [
+    {
+      "version": "1.1.0",
+      "date": "2026-04-27",
+      "content": "新增做种目录选择功能：支持全局默认做种目录配置和单任务做种目录自定义，转移完成后可将种子指向指定目录继续上传"
+    },
     {
       "version": "1.0.0",
       "date": "2026-04-26",
@@ -14,3 +19,4 @@
     }
   ]
 }
+

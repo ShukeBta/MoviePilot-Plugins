@@ -741,6 +741,7 @@ class Seedkeeper(_PluginBase):
                             return {"downloaders": downloaders, "source": used_source}
                         break
                 except TypeError:
+                    logger.debug(f"SeedKeeper DownloaderHelper.get_configs 不支持参数 {kwargs}，尝试下一签名")
                     continue
                 except Exception as e:
                     logger.warning(f"SeedKeeper DownloaderHelper 获取失败: {e}")

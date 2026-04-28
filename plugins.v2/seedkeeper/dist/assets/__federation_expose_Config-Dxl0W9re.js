@@ -51,7 +51,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
     });
     async function fetchDownloaders() {
       try {
-        const res = await props.api.get("/plugins/seedkeeper/downloaders/list");
+        const res = await props.api.get("plugin/Seedkeeper/downloaders/list");
         if (res.downloaders && Array.isArray(res.downloaders)) {
           downloaderOptions.value = res.downloaders.map((d) => ({
             title: `${d.name}${d.type ? " (" + d.type + ")" : ""}`,
@@ -175,7 +175,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             _: 1
           }, 8, ["modelValue"])
         ]),
-        _createVNode(_component_v_row, { class: "mt-0" }, {
+        _createVNode(_component_v_row, { class: "mt-4" }, {
           default: _withCtx(() => [
             _createVNode(_component_v_col, { cols: "6" }, {
               default: _withCtx(() => [

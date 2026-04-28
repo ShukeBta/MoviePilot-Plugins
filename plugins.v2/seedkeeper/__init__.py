@@ -47,7 +47,7 @@ class Seedkeeper(_PluginBase):
     plugin_order = 50
     auth_level = 1
 
-    # ==================== Vue 渲染模式 ====================
+    # ==================== 渲染模式 ====================
     def get_render_mode(self) -> Tuple[str, str]:
         """
         获取插件渲染模式
@@ -55,7 +55,8 @@ class Seedkeeper(_PluginBase):
         vuetify: JSON 配置模式
         vue: Module Federation 远程组件模式
         """
-        return "vue", "dist/assets"
+        # 使用 vuetify 模式，彻底解决 Vue 组件缓存问题
+        return "vuetify", ""
 
     # ==================== 侧栏导航 ====================
     def get_sidebar_nav(self) -> List[Dict[str, Any]]:
@@ -112,6 +113,9 @@ class Seedkeeper(_PluginBase):
     # ==================== 配置页面 ====================
     def get_form(self) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """获取配置表单"""
+        # 获取下载器选项
+        downloader_options = self._get_downloader_options()
+
         return [
             {
                 "component": "VSwitch",
@@ -131,45 +135,100 @@ class Seedkeeper(_PluginBase):
                 },
                 "model": "auto_seed"
             },
+            # 做种策略 - 使用按钮组
             {
-                "component": "VSelect",
-                "props": {
-                    "label": "做种策略",
-                    "items": [
-                        {"title": "按分享率", "value": "ratio"},
-                        {"title": "按做种时间", "value": "seedtime"},
-                        {"title": "手动管理", "value": "manual"}
-                    ],
-                    "hint": "决定何时停止做种的策略",
-                    "persistent-hint": True,
-                },
-                "model": "strategy"
+                "component": "div",
+                "props": {"class": "mb-4"},
+                "content": [
+                    {
+                        "component": "div",
+                        "props": {"class": "text-caption text-medium-emphasis mb-2"},
+                        "content": "做种策略（决定何时停止做种）"
+                    },
+                    {
+                        "component": "VBtnToggle",
+                        "props": {
+                            "model": "strategy",
+                            "mandatory": True,
+                            "color": "primary",
+                            "density": "compact",
+                            "class": "w-100"
+                        },
+                        "content": [
+                            {
+                                "component": "VBtn",
+                                "props": {"value": "ratio", "size": "small"},
+                                "content": [
+                                    {"component": "VIcon", "props": {"start": True, "size": 16}, "content": "mdi-chart-areaspline"},
+                                    "按分享率"
+                                ]
+                            },
+                            {
+                                "component": "VBtn",
+                                "props": {"value": "seedtime", "size": "small"},
+                                "content": [
+                                    {"component": "VIcon", "props": {"start": True, "size": 16}, "content": "mdi-clock-outline"},
+                                    "按做种时间"
+                                ]
+                            },
+                            {
+                                "component": "VBtn",
+                                "props": {"value": "manual", "size": "small"},
+                                "content": [
+                                    {"component": "VIcon", "props": {"start": True, "size": 16}, "content": "mdi-hand-pointing-up"},
+                                    "手动管理"
+                                ]
+                            }
+                        ]
+                    }
+                ]
             },
             {
-                "component": "VTextField",
-                "props": {
-                    "label": "最小分享率",
-                    "type": "number",
-                    "hint": "达到此分享率后开始计算",
-                    "persistent-hint": True,
-                },
-                "model": "min_ratio"
-            },
-            {
-                "component": "VTextField",
-                "props": {
-                    "label": "最大分享率",
-                    "type": "number",
-                    "hint": "达到此分享率后自动处理",
-                    "persistent-hint": True,
-                },
-                "model": "max_ratio"
+                "component": "VRow",
+                "props": {"class": "mt-2"},
+                "content": [
+                    {
+                        "component": "VCol",
+                        "props": {"cols": 6},
+                        "content": [
+                            {
+                                "component": "VTextField",
+                                "props": {
+                                    "label": "最小分享率",
+                                    "type": "number",
+                                    "density": "compact",
+                                    "hint": "达到此分享率后开始计算",
+                                    "persistent-hint": True,
+                                },
+                                "model": "min_ratio"
+                            }
+                        ]
+                    },
+                    {
+                        "component": "VCol",
+                        "props": {"cols": 6},
+                        "content": [
+                            {
+                                "component": "VTextField",
+                                "props": {
+                                    "label": "最大分享率",
+                                    "type": "number",
+                                    "density": "compact",
+                                    "hint": "达到此分享率后自动处理",
+                                    "persistent-hint": True,
+                                },
+                                "model": "max_ratio"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "component": "VTextField",
                 "props": {
                     "label": "做种时间限制（小时）",
                     "type": "number",
+                    "density": "compact",
                     "hint": "0 表示不做限制",
                     "persistent-hint": True,
                 },
@@ -188,14 +247,12 @@ class Seedkeeper(_PluginBase):
                 "component": "VSelect",
                 "props": {
                     "label": "下载器",
-                    "items": [
-                        {"title": "全部", "value": ""},
-                        {"title": "qBittorrent", "value": "qbittorrent"},
-                        {"title": "Transmission", "value": "transmission"}
-                    ],
+                    "items": downloader_options,
                     "multiple": True,
                     "chips": True,
-                    "hint": "选择要管理的下载器",
+                    "closable-chips": True,
+                    "density": "compact",
+                    "hint": "选择要由 SeedKeeper 管理的下载器（仅显示已在 MoviePilot 中配置的下载器）",
                     "persistent-hint": True,
                 },
                 "model": "downloaders"
@@ -204,6 +261,7 @@ class Seedkeeper(_PluginBase):
                 "component": "VTextField",
                 "props": {
                     "label": "默认做种目录",
+                    "density": "compact",
                     "hint": "转移后做种使用的目录（如 /downloads/seeding），留空则使用下载器原始保存路径",
                     "persistent-hint": True,
                     "placeholder": "例如：/vol2/1000/qBittorrent/seeding",
@@ -222,6 +280,22 @@ class Seedkeeper(_PluginBase):
             "downloaders": [],
             "seed_dir": ""
         }
+
+    def _get_downloader_options(self) -> List[Dict[str, str]]:
+        """获取下载器选项列表"""
+        options = []
+        if _DownloaderHelper is not None:
+            try:
+                helper = _DownloaderHelper()
+                configs = helper.get_configs(include_disabled=True) or {}
+                for name, cfg in configs.items():
+                    options.append({
+                        "title": name,
+                        "value": name
+                    })
+            except Exception as e:
+                logger.warning(f"SeedKeeper 获取下载器列表失败: {e}")
+        return options if options else [{"title": "未检测到下载器", "value": "__none__"}]
 
     # ==================== 详情页面 ====================
     def get_page(self) -> List[Dict[str, Any]]:

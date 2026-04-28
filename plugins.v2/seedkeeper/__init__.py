@@ -26,6 +26,7 @@ except ImportError:
     _DownloaderHelper = None
 
 
+
 class Seedkeeper(_PluginBase):
     """SeedKeeper 做种助手插件"""
     
@@ -33,7 +34,7 @@ class Seedkeeper(_PluginBase):
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.3.0"
+    plugin_version = "1.3.2"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
@@ -711,23 +712,92 @@ class Seedkeeper(_PluginBase):
     def downloaders_list(self) -> Dict[str, Any]:
         """
         返回 MoviePilot 中已配置的下载器列表。
+        优先尝试 DownloaderHelper，其次从配置文件读取。
         """
-        if _DownloaderHelper is None:
-            return {"downloaders": [], "error": "DownloaderHelper 不可用"}
-        try:
-            helper = _DownloaderHelper()
-            configs = helper.get_configs() or {}
-            downloaders = []
-            for name, cfg in configs.items():
-                downloaders.append({
-                    "name": name,
-                    "type": getattr(cfg, "type", "") or "",
-                    "enabled": getattr(cfg, "enabled", True)
-                })
-            return {"downloaders": downloaders}
-        except Exception as e:
-            logger.error(f"SeedKeeper downloaders_list 失败: {e}")
-            return {"downloaders": [], "error": str(e)}
+        downloaders = []
+        used_source = ""
+
+        # 方法一：DownloaderHelper
+        if _DownloaderHelper is not None:
+            try:
+                helper = _DownloaderHelper()
+                configs = helper.get_configs() or {}
+                if configs:
+                    used_source = "helper"
+                    for name, cfg in configs.items():
+                        downloaders.append({
+                            "name": name,
+                            "type": getattr(cfg, "type", "") or "",
+                            "enabled": getattr(cfg, "enabled", True)
+                        })
+            except Exception as e:
+                logger.warning(f"SeedKeeper DownloaderHelper 获取失败: {e}")
+
+        # 方法二：从配置文件读取
+        if not downloaders:
+            try:
+                # MoviePilot V2 将下载器配置存在每个模块的配置里
+                # 扫描 /config 目录下以 downloader_ 开头的配置文件
+                config_dir = Path("/config")
+                known_types = {
+                    "qbittorrent": "qbittorrent",
+                    "qbittorrent_": "qbittorrent",
+                    "transmission": "transmission",
+                    "transmission_": "transmission",
+                }
+                seen = set()
+                if config_dir.is_dir():
+                    for f in config_dir.iterdir():
+                        if f.suffix in (".json", ".yaml", ".yml") and not f.name.startswith("."):
+                            try:
+                                with open(f, "r", encoding="utf-8") as cf:
+                                    data = json.load(cf) if f.suffix == ".json" else {}
+                                # 尝试从配置文件内容识别下载器
+                                for key in ["qbittorrent", "qbittorrent_", "transmission", "transmission_"]:
+                                    if key in f.name.lower() and key not in seen:
+                                        seen.add(key)
+                                        dtype = "qbittorrent" if "qbittorrent" in key else "transmission"
+                                        enabled = data.get("enabled", True) if data else True
+                                        name = f.stem.replace("_", " ").replace("-", " ").title()
+                                        downloaders.append({
+                                            "name": name,
+                                            "type": dtype,
+                                            "enabled": enabled
+                                        })
+                            except Exception:
+                                pass
+            except Exception as e:
+                logger.warning(f"SeedKeeper 配置文件扫描失败: {e}")
+
+        # 方法三：直接枚举常见下载器配置文件名
+        if not downloaders:
+            candidate_names = [
+                "qbittorrent", "qbittorrent_1", "qbittorrent_2",
+                "qbittorrent-1", "qbittorrent-2",
+                "transmission", "transmission_1", "transmission_2",
+                "transmission-1", "transmission-2",
+            ]
+            config_dir = Path("/config")
+            seen = set()
+            if config_dir.is_dir():
+                for f in config_dir.iterdir():
+                    fname = f.stem.lower()
+                    for cand in candidate_names:
+                        if fname == cand or fname.startswith(cand + "_") or fname.startswith(cand + "-"):
+                            dtype = "qbittorrent" if "qbittorrent" in fname else "transmission"
+                            key = f"{dtype}:{f.stem}"
+                            if key not in seen:
+                                seen.add(key)
+                                downloaders.append({
+                                    "name": f.stem.replace("_", " ").replace("-", " ").title(),
+                                    "type": dtype,
+                                    "enabled": True
+                                })
+
+        return {
+            "downloaders": downloaders,
+            "source": used_source or ("config_scan" if downloaders else "")
+        }
 
     def set_task_seed_dir(self, data: dict) -> Dict[str, Any]:
         """设置单个任务的做种目录，并立即通知下载器"""

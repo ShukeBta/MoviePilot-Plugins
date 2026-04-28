@@ -193,9 +193,8 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
           "closable-chips": "",
           hint: "勾选要由 SeedKeeper 管理的下载器（仅显示已在 MoviePilot 中配置的下载器）",
           "persistent-hint": "",
-          disabled: !config.value.enabled,
           class: "mt-4"
-        }, null, 8, ["modelValue", "items", "disabled"]),
+        }, null, 8, ["modelValue", "items"]),
         _createVNode(_component_v_divider, { class: "my-4" }),
         _createElementVNode("div", _hoisted_2, [
           _createVNode(_component_v_icon, {
@@ -339,6 +338,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
   }
 });
 
-const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-a090e727"]]);
+const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-ebbada5a"]]);
 
 export { Config as default };

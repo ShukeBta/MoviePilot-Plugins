@@ -40,7 +40,7 @@ class Seedkeeper(_PluginBase):
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.3.3"
+    plugin_version = "1.3.4"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"

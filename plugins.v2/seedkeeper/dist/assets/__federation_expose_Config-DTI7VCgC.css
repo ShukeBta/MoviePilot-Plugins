@@ -1,0 +1,18 @@
+
+.seedkeeper-config[data-v-ce063db5] {
+  padding: 16px;
+}
+.gap-2[data-v-ce063db5] {
+  gap: 8px;
+}
+.strategy-group[data-v-ce063db5] {
+  margin-bottom: 8px;
+}
+.strategy-toggle[data-v-ce063db5] {
+  width: 100%;
+  flex-wrap: wrap;
+}
+.strategy-toggle .v-btn[data-v-ce063db5] {
+  flex: 1;
+  min-width: 100px;
+}

@@ -5,8 +5,8 @@ const currentImports = {};
       dynamicLoadingCss(["__federation_expose_Page-BstKaUvm.css","FolderBrowser-DVgURC0i.css"], false, './Page');
       return __federation_import('./__federation_expose_Page-D-u5FiJm.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},
 "./Config":()=>{
-      dynamicLoadingCss(["__federation_expose_Config-CRn4lzDh.css","FolderBrowser-DVgURC0i.css"], false, './Config');
-      return __federation_import('./__federation_expose_Config-9HGk-eJc.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},
+      dynamicLoadingCss(["__federation_expose_Config-ChTWdOxz.css","FolderBrowser-DVgURC0i.css"], false, './Config');
+      return __federation_import('./__federation_expose_Config-Dxl0W9re.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},
 "./Dashboard":()=>{
       dynamicLoadingCss(["__federation_expose_Dashboard-huUcqioW.css"], false, './Dashboard');
       return __federation_import('./__federation_expose_Dashboard-fVyP7HJu.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},};

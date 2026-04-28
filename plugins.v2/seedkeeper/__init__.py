@@ -25,6 +25,12 @@ try:
 except ImportError:
     _DownloaderHelper = None
 
+try:
+    import sqlite3
+    _sqlite3 = sqlite3
+except ImportError:
+    _sqlite3 = None
+
 
 
 class Seedkeeper(_PluginBase):
@@ -34,7 +40,7 @@ class Seedkeeper(_PluginBase):
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.3.2"
+    plugin_version = "1.3.3"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
@@ -712,7 +718,7 @@ class Seedkeeper(_PluginBase):
     def downloaders_list(self) -> Dict[str, Any]:
         """
         返回 MoviePilot 中已配置的下载器列表。
-        优先尝试 DownloaderHelper，其次从配置文件读取。
+        依次尝试：DownloaderHelper → SQLite 数据库 → 配置文件扫描
         """
         downloaders = []
         used_source = ""
@@ -721,7 +727,7 @@ class Seedkeeper(_PluginBase):
         if _DownloaderHelper is not None:
             try:
                 helper = _DownloaderHelper()
-                configs = helper.get_configs() or {}
+                configs = helper.get_configs(include_disabled=True) or {}
                 if configs:
                     used_source = "helper"
                     for name, cfg in configs.items():
@@ -730,74 +736,91 @@ class Seedkeeper(_PluginBase):
                             "type": getattr(cfg, "type", "") or "",
                             "enabled": getattr(cfg, "enabled", True)
                         })
+                    if downloaders:
+                        return {"downloaders": downloaders, "source": used_source}
             except Exception as e:
                 logger.warning(f"SeedKeeper DownloaderHelper 获取失败: {e}")
 
-        # 方法二：从配置文件读取
-        if not downloaders:
-            try:
-                # MoviePilot V2 将下载器配置存在每个模块的配置里
-                # 扫描 /config 目录下以 downloader_ 开头的配置文件
-                config_dir = Path("/config")
-                known_types = {
-                    "qbittorrent": "qbittorrent",
-                    "qbittorrent_": "qbittorrent",
-                    "transmission": "transmission",
-                    "transmission_": "transmission",
-                }
-                seen = set()
-                if config_dir.is_dir():
-                    for f in config_dir.iterdir():
-                        if f.suffix in (".json", ".yaml", ".yml") and not f.name.startswith("."):
-                            try:
-                                with open(f, "r", encoding="utf-8") as cf:
-                                    data = json.load(cf) if f.suffix == ".json" else {}
-                                # 尝试从配置文件内容识别下载器
-                                for key in ["qbittorrent", "qbittorrent_", "transmission", "transmission_"]:
-                                    if key in f.name.lower() and key not in seen:
-                                        seen.add(key)
-                                        dtype = "qbittorrent" if "qbittorrent" in key else "transmission"
-                                        enabled = data.get("enabled", True) if data else True
-                                        name = f.stem.replace("_", " ").replace("-", " ").title()
+        # 方法二：从 SQLite 数据库读取
+        if _sqlite3 is not None:
+            db_paths = [
+                Path("/config/moviepilot.db"),
+                Path("/config/moviepilot-v2.db"),
+            ]
+            for db_path in db_paths:
+                if not db_path.exists():
+                    continue
+                try:
+                    conn = _sqlite3.connect(str(db_path))
+                    conn.row_factory = _sqlite3.Row
+                    cur = conn.cursor()
+                    # 查询 systemconfig 表中的下载器配置
+                    cur.execute(
+                        "SELECT key, value FROM systemconfig WHERE key LIKE '%downloader%' OR key LIKE '%qbittorrent%' OR key LIKE '%transmission%'"
+                    )
+                    rows = cur.fetchall()
+                    cur.close()
+                    conn.close()
+                    if rows:
+                        for row in rows:
+                            key = row["key"] or ""
+                            val_str = row["value"] or "{}"
+                            if key and val_str.startswith("{"):
+                                try:
+                                    val = json.loads(val_str)
+                                    name = val.get("name") or key.replace("downloaders_", "").replace("qbittorrent_", "").replace("transmission_", "")
+                                    dtype = val.get("type", "")
+                                    enabled = val.get("enabled", True)
+                                    if name and name not in [d["name"] for d in downloaders]:
                                         downloaders.append({
                                             "name": name,
                                             "type": dtype,
                                             "enabled": enabled
                                         })
-                            except Exception:
-                                pass
-            except Exception as e:
-                logger.warning(f"SeedKeeper 配置文件扫描失败: {e}")
+                                        used_source = "sqlite"
+                                except (json.JSONDecodeError, Exception):
+                                    pass
+                    if downloaders:
+                        break
+                except Exception as e:
+                    logger.warning(f"SeedKeeper SQLite 读取失败 ({db_path}): {e}")
 
-        # 方法三：直接枚举常见下载器配置文件名
+        # 方法三：扫描配置文件
         if not downloaders:
-            candidate_names = [
+            candidate_prefixes = [
                 "qbittorrent", "qbittorrent_1", "qbittorrent_2",
-                "qbittorrent-1", "qbittorrent-2",
-                "transmission", "transmission_1", "transmission_2",
-                "transmission-1", "transmission-2",
+                "qbittorrent-", "transmission", "transmission_1",
+                "transmission_2", "transmission-",
             ]
             config_dir = Path("/config")
             seen = set()
             if config_dir.is_dir():
                 for f in config_dir.iterdir():
-                    fname = f.stem.lower()
-                    for cand in candidate_names:
-                        if fname == cand or fname.startswith(cand + "_") or fname.startswith(cand + "-"):
-                            dtype = "qbittorrent" if "qbittorrent" in fname else "transmission"
+                    fname_lower = f.stem.lower()
+                    for cand in candidate_prefixes:
+                        if fname_lower == cand or fname_lower.startswith(cand + "_") or fname_lower.startswith(cand + "-"):
+                            dtype = "qbittorrent" if "qbittorrent" in fname_lower else "transmission"
                             key = f"{dtype}:{f.stem}"
                             if key not in seen:
                                 seen.add(key)
+                                # 尝试读取 enabled 状态
+                                enabled = True
+                                if f.suffix == ".json":
+                                    try:
+                                        with open(f, "r", encoding="utf-8") as cf:
+                                            data = json.load(cf)
+                                            enabled = data.get("enabled", True)
+                                    except Exception:
+                                        pass
                                 downloaders.append({
                                     "name": f.stem.replace("_", " ").replace("-", " ").title(),
                                     "type": dtype,
-                                    "enabled": True
+                                    "enabled": enabled
                                 })
+                                used_source = "config_scan"
+                                break
 
-        return {
-            "downloaders": downloaders,
-            "source": used_source or ("config_scan" if downloaders else "")
-        }
+        return {"downloaders": downloaders, "source": used_source}
 
     def set_task_seed_dir(self, data: dict) -> Dict[str, Any]:
         """设置单个任务的做种目录，并立即通知下载器"""

@@ -117,9 +117,8 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
           density: "compact",
           hint: "决定何时停止做种的策略",
           "persistent-hint": "",
-          disabled: !config.value.enabled,
           class: "mt-4 mb-2"
-        }, null, 8, ["modelValue", "disabled"]),
+        }, null, 8, ["modelValue"]),
         _createVNode(_component_v_row, { class: "mt-0" }, {
           default: _withCtx(() => [
             _createVNode(_component_v_col, { cols: "6" }, {
@@ -132,7 +131,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   type: "number",
                   density: "compact",
                   hint: "达到此分享率后开始计算",
-                  disabled: !config.value.enabled || config.value.strategy !== "ratio",
+                  disabled: config.value.strategy !== "ratio",
                   min: "0",
                   step: "0.1"
                 }, null, 8, ["modelValue", "disabled"])
@@ -149,7 +148,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   type: "number",
                   density: "compact",
                   hint: "达到此分享率后自动处理",
-                  disabled: !config.value.enabled || config.value.strategy !== "ratio",
+                  disabled: config.value.strategy !== "ratio",
                   min: "0",
                   step: "0.1"
                 }, null, 8, ["modelValue", "disabled"])
@@ -168,7 +167,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
           density: "compact",
           hint: "0 表示不做限制",
           "persistent-hint": "",
-          disabled: !config.value.enabled || config.value.strategy !== "seedtime",
+          disabled: config.value.strategy !== "seedtime",
           min: "0",
           class: "mt-2"
         }, null, 8, ["modelValue", "disabled"]),
@@ -218,7 +217,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
           placeholder: "例如：/vol2/1000/qBittorrent/seeding",
           "prepend-inner-icon": "mdi-folder-outline",
           clearable: "",
-          disabled: !config.value.enabled,
           class: "mb-2"
         }, {
           "append-inner": _withCtx(() => [
@@ -227,7 +225,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
               size: "x-small",
               variant: "text",
               color: "primary",
-              disabled: !config.value.enabled,
               title: "浏览目录",
               onClick: openDirBrowse
             }, {
@@ -240,10 +237,10 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                 })
               ]),
               _: 1
-            }, 8, ["disabled"])
+            })
           ]),
           _: 1
-        }, 8, ["modelValue", "disabled"]),
+        }, 8, ["modelValue"]),
         config.value.seed_dir ? (_openBlock(), _createBlock(_component_v_alert, {
           key: 0,
           type: "info",
@@ -338,6 +335,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
   }
 });
 
-const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-ebbada5a"]]);
+const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-114e201d"]]);
 
 export { Config as default };

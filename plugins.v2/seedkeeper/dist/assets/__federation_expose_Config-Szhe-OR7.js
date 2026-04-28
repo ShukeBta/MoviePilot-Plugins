@@ -118,9 +118,9 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
           hint: "决定何时停止做种的策略",
           "persistent-hint": "",
           disabled: !config.value.enabled,
-          class: "mt-4"
+          class: "mt-4 mb-2"
         }, null, 8, ["modelValue", "disabled"]),
-        _createVNode(_component_v_row, null, {
+        _createVNode(_component_v_row, { class: "mt-0" }, {
           default: _withCtx(() => [
             _createVNode(_component_v_col, { cols: "6" }, {
               default: _withCtx(() => [
@@ -339,6 +339,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
   }
 });
 
-const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-97009a2f"]]);
+const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-a090e727"]]);
 
 export { Config as default };

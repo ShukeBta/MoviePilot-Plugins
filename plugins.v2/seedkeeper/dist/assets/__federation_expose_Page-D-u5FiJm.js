@@ -1,5 +1,5 @@
 import { importShared } from './__federation_fn_import-JrT3xvdd.js';
-import { F as FolderBrowser } from './FolderBrowser-TFTRInSr.js';
+import { F as FolderBrowser } from './FolderBrowser-BWK0KtmX.js';
 import { _ as _export_sfc } from './_plugin-vue_export-helper-pcqpp-6-.js';
 
 const {defineComponent:_defineComponent} = await importShared('vue');

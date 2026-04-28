@@ -1,0 +1,99 @@
+
+.folder-browser[data-v-074b2e76] {
+  min-width: 340px;
+}
+
+/* 常用路径 chips */
+.mounts-section[data-v-074b2e76] {
+  background: rgba(var(--v-theme-surface-variant), 0.3);
+  border-radius: 8px;
+  padding: 8px 10px 4px;
+}
+.mounts-chips[data-v-074b2e76] {
+  display: flex;
+  flex-wrap: wrap;
+}
+.mount-chip[data-v-074b2e76] {
+  max-width: 200px;
+}
+.mount-label[data-v-074b2e76] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* 路径跳转行 */
+.path-jump-row .v-text-field[data-v-074b2e76] {
+  font-size: 12px;
+}
+
+/* 面包屑 */
+.breadcrumb-row[data-v-074b2e76] {
+  gap: 1px;
+  min-height: 22px;
+}
+.breadcrumb-seg[data-v-074b2e76] {
+  cursor: pointer;
+  font-size: 12px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+.breadcrumb-seg[data-v-074b2e76]:hover {
+  background: rgba(var(--v-theme-primary), 0.1);
+}
+
+/* 目录树 */
+.dir-tree[data-v-074b2e76] {
+  border: 1px solid rgba(var(--v-border-color), 0.18);
+  border-radius: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  background: rgba(var(--v-theme-surface), 1);
+}
+.dir-row[data-v-074b2e76] {
+  display: flex;
+  align-items: center;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-right: 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.12s;
+  user-select: none;
+}
+.dir-row[data-v-074b2e76]:hover {
+  background: rgba(var(--v-theme-primary), 0.06);
+}
+.dir-selected[data-v-074b2e76] {
+  background: rgba(var(--v-theme-primary), 0.14) !important;
+}
+.dir-name[data-v-074b2e76] {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.expand-btn[data-v-074b2e76], .enter-btn[data-v-074b2e76] { flex-shrink: 0;
+}
+.expand-placeholder[data-v-074b2e76] {
+  display: inline-block;
+  width: 24px;
+  flex-shrink: 0;
+}
+.enter-btn[data-v-074b2e76] {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.dir-row:hover .enter-btn[data-v-074b2e76] {
+  opacity: 1;
+}
+.gap-2[data-v-074b2e76] { gap: 8px;
+}

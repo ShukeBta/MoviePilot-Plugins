@@ -14,6 +14,11 @@ import os
 from pathlib import Path
 from datetime import datetime
 
+try:
+    from fastapi import Request as _FastAPIRequest
+except ImportError:
+    _FastAPIRequest = None
+
 
 class Seedkeeper(_PluginBase):
     """SeedKeeper 做种助手插件"""
@@ -22,7 +27,7 @@ class Seedkeeper(_PluginBase):
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.1.0"
+    plugin_version = "1.2.0"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
@@ -376,6 +381,13 @@ class Seedkeeper(_PluginBase):
                 "summary": "列出指定目录下的子目录"
             },
             {
+                "path": "/fs/mounts",
+                "endpoint": self.fs_mounts,
+                "methods": ["GET"],
+                "auth": "bear",
+                "summary": "获取常用挂载点和推荐路径"
+            },
+            {
                 "path": "/transfer/hook",
                 "endpoint": self.transfer_hook,
                 "methods": ["POST"],
@@ -582,35 +594,106 @@ class Seedkeeper(_PluginBase):
         """获取全局默认做种目录"""
         return {"seed_dir": self._seed_dir}
 
-    def fs_ls(self, path: str = "/") -> Dict[str, Any]:
+    def fs_ls(self, request: Any = None, path: str = "/") -> Dict[str, Any]:
         """
-        列出指定目录下的直接子目录，供前端目录浏览器使用。
-        参数 path 通过 query string 传入，如 ?path=/vol2/1000
+        列出指定目录下的直接子目录。
+        支持两种传参方式：
+          1. FastAPI Request 对象（从 query string 取 path）
+          2. 函数默认参数 path（MoviePilot 直接注入）
         """
         try:
+            # 优先从 Request query string 取参数
+            if request is not None and hasattr(request, "query_params"):
+                path = request.query_params.get("path", path) or path
+
             target = Path(path) if path else Path("/")
             if not target.is_absolute():
                 target = Path("/") / target
             if not target.exists() or not target.is_dir():
-                return {"path": str(target), "dirs": [], "error": "目录不存在或不可访问"}
+                return {"path": str(target), "dirs": [], "error": f"目录不存在或不可访问: {target}"}
+
             dirs = []
             try:
-                for entry in sorted(target.iterdir(), key=lambda e: e.name.lower()):
-                    if entry.is_dir() and not entry.name.startswith("."):
-                        dirs.append({
-                            "name": entry.name,
-                            "path": str(entry),
-                            "has_children": any(
-                                True for e in entry.iterdir()
-                                if e.is_dir() and not e.name.startswith(".")
-                            ) if os.access(str(entry), os.R_OK) else False
-                        })
+                entries = sorted(
+                    [e for e in target.iterdir() if e.is_dir() and not e.name.startswith(".")],
+                    key=lambda e: e.name.lower()
+                )
+                for entry in entries:
+                    has_children = False
+                    if os.access(str(entry), os.R_OK):
+                        try:
+                            has_children = any(
+                                e.is_dir() and not e.name.startswith(".")
+                                for e in entry.iterdir()
+                            )
+                        except (PermissionError, OSError):
+                            pass
+                    dirs.append({
+                        "name": entry.name,
+                        "path": str(entry),
+                        "has_children": has_children
+                    })
             except PermissionError:
-                return {"path": str(target), "dirs": [], "error": "权限不足"}
+                return {"path": str(target), "dirs": [], "error": "权限不足，无法读取此目录"}
             return {"path": str(target), "dirs": dirs}
         except Exception as e:
-            logger.error(f"SeedKeeper fs_ls 失败: {e}")
+            logger.error(f"SeedKeeper fs_ls 失败 path={path}: {e}")
             return {"path": path, "dirs": [], "error": str(e)}
+
+    def fs_mounts(self) -> Dict[str, Any]:
+        """
+        返回常用/推荐路径列表，帮助用户快速定位挂载点。
+        来源：
+          1. /proc/mounts 中的非系统挂载点
+          2. 常见 Docker 挂载目录（若存在）
+          3. 当前插件配置中已设的 seed_dir
+        """
+        mounts = []
+        seen = set()
+
+        def _add(path: str, label: str, icon: str = "mdi-folder-network"):
+            p = path.rstrip("/") or "/"
+            if p not in seen and Path(p).is_dir():
+                seen.add(p)
+                mounts.append({"path": p, "label": label, "icon": icon})
+
+        # 1. 解析 /proc/mounts 获取真实挂载点
+        skip_fs = {"sysfs", "proc", "devtmpfs", "devpts", "tmpfs", "cgroup",
+                   "cgroup2", "mqueue", "hugetlbfs", "debugfs", "tracefs",
+                   "pstore", "bpf", "overlay", "nsfs", "fusectl", "efivarfs",
+                   "securityfs", "configfs", "ramfs", "autofs", "rpc_pipefs"}
+        try:
+            with open("/proc/mounts", "r") as f:
+                for line in f:
+                    parts = line.split()
+                    if len(parts) >= 3:
+                        fs_type = parts[2]
+                        mount_point = parts[1].replace("\\040", " ")
+                        if fs_type not in skip_fs and mount_point != "/":
+                            _add(mount_point, mount_point, "mdi-harddisk")
+        except Exception:
+            pass
+
+        # 2. 常见 Docker 映射路径（MoviePilot 典型）
+        for candidate in [
+            "/media", "/downloads", "/download", "/data", "/storage",
+            "/vol1", "/vol2", "/vol3", "/vol4", "/vol5",
+            "/mnt", "/mnt/user", "/mnt/cache",
+            "/cloud-media-sync", "/cloud-media-sync/media",
+            "/config", "/moviepilot",
+        ]:
+            if Path(candidate).is_dir():
+                _add(candidate, candidate, "mdi-folder-star")
+
+        # 3. 当前配置的做种目录
+        if self._seed_dir:
+            _add(self._seed_dir, f"当前设置: {self._seed_dir}", "mdi-folder-check")
+
+        # 4. 始终保留根目录
+        if "/" not in seen:
+            mounts.insert(0, {"path": "/", "label": "/（根目录）", "icon": "mdi-server"})
+
+        return {"mounts": mounts}
 
     def set_task_seed_dir(self, data: dict) -> Dict[str, Any]:
         """设置单个任务的做种目录，并立即通知下载器"""

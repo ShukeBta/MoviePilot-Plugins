@@ -121,7 +121,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   type: "number",
                   density: "compact",
                   hint: "达到此分享率后开始计算",
-                  "persistent-hint": "",
                   disabled: !config.value.enabled || config.value.strategy !== "ratio",
                   min: "0",
                   step: "0.1"
@@ -139,7 +138,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   type: "number",
                   density: "compact",
                   hint: "达到此分享率后自动处理",
-                  "persistent-hint": "",
                   disabled: !config.value.enabled || config.value.strategy !== "ratio",
                   min: "0",
                   step: "0.1"
@@ -330,6 +328,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
   }
 });
 
-const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-c6d9aebe"]]);
+const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-da1a0bde"]]);
 
 export { Config as default };

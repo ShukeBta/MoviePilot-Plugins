@@ -40,7 +40,7 @@ class Seedkeeper(_PluginBase):
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.3.4"
+    plugin_version = "1.4.0"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
@@ -718,28 +718,34 @@ class Seedkeeper(_PluginBase):
     def downloaders_list(self) -> Dict[str, Any]:
         """
         返回 MoviePilot 中已配置的下载器列表。
-        依次尝试：DownloaderHelper → SQLite 数据库 → 配置文件扫描
+        依次尝试：DownloaderHelper → SQLite 数据库 → 配置文件扫描 → 静态默认列表
         """
         downloaders = []
         used_source = ""
 
-        # 方法一：DownloaderHelper
+        # 方法一：DownloaderHelper（兼容多种签名）
         if _DownloaderHelper is not None:
-            try:
-                helper = _DownloaderHelper()
-                configs = helper.get_configs(include_disabled=True) or {}
-                if configs:
-                    used_source = "helper"
-                    for name, cfg in configs.items():
-                        downloaders.append({
-                            "name": name,
-                            "type": getattr(cfg, "type", "") or "",
-                            "enabled": getattr(cfg, "enabled", True)
-                        })
-                    if downloaders:
-                        return {"downloaders": downloaders, "source": used_source}
-            except Exception as e:
-                logger.warning(f"SeedKeeper DownloaderHelper 获取失败: {e}")
+            for kwargs in [{"include_disabled": True}, {}]:
+                try:
+                    helper = _DownloaderHelper()
+                    configs = helper.get_configs(**kwargs) or {}
+                    if configs:
+                        used_source = "helper"
+                        for name, cfg in configs.items():
+                            downloaders.append({
+                                "name": name,
+                                "type": getattr(cfg, "type", "") or "",
+                                "enabled": getattr(cfg, "enabled", True)
+                            })
+                        if downloaders:
+                            return {"downloaders": downloaders, "source": used_source}
+                        break
+                except TypeError:
+                    logger.debug(f"SeedKeeper DownloaderHelper.get_configs 不支持参数 {kwargs}，尝试下一签名")
+                    continue
+                except Exception as e:
+                    logger.warning(f"SeedKeeper DownloaderHelper 获取失败: {e}")
+                    break
 
         # 方法二：从 SQLite 数据库读取
         if _sqlite3 is not None:
@@ -819,6 +825,15 @@ class Seedkeeper(_PluginBase):
                                 })
                                 used_source = "config_scan"
                                 break
+
+        # 方法四：静态默认列表（所有动态方法均失败时的保底）
+        if not downloaders:
+            used_source = "default"
+            downloaders = [
+                {"name": "qbittorrent", "type": "qbittorrent", "enabled": True},
+                {"name": "transmission", "type": "transmission", "enabled": True},
+            ]
+            logger.warning("SeedKeeper: 无法自动获取下载器列表，已返回默认选项")
 
         return {"downloaders": downloaders, "source": used_source}
 

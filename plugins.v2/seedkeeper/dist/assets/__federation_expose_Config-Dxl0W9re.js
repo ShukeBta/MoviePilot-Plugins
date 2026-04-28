@@ -50,17 +50,24 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
       await fetchDownloaders();
     });
     async function fetchDownloaders() {
+      const fallback = [
+        { title: "qBittorrent", value: "qbittorrent", disabled: false },
+        { title: "Transmission", value: "transmission", disabled: false }
+      ];
       try {
         const res = await props.api.get("plugin/Seedkeeper/downloaders/list");
-        if (res.downloaders && Array.isArray(res.downloaders)) {
+        if (res.downloaders && Array.isArray(res.downloaders) && res.downloaders.length > 0) {
           downloaderOptions.value = res.downloaders.map((d) => ({
             title: `${d.name}${d.type ? " (" + d.type + ")" : ""}`,
             value: d.name,
             disabled: !d.enabled
           }));
+        } else {
+          downloaderOptions.value = fallback;
         }
       } catch (e) {
         console.warn("获取下载器列表失败:", e);
+        downloaderOptions.value = fallback;
       }
     }
     function saveConfig() {
@@ -175,7 +182,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
             _: 1
           }, 8, ["modelValue"])
         ]),
-        _createVNode(_component_v_row, { class: "mt-4" }, {
+        _createVNode(_component_v_row, { class: "mt-8" }, {
           default: _withCtx(() => [
             _createVNode(_component_v_col, { cols: "6" }, {
               default: _withCtx(() => [
@@ -187,6 +194,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   type: "number",
                   density: "compact",
                   hint: "达到此分享率后开始计算",
+                  "persistent-hint": "",
                   disabled: config.value.strategy !== "ratio",
                   min: "0",
                   step: "0.1"
@@ -204,6 +212,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
                   type: "number",
                   density: "compact",
                   hint: "达到此分享率后自动处理",
+                  "persistent-hint": "",
                   disabled: config.value.strategy !== "ratio",
                   min: "0",
                   step: "0.1"

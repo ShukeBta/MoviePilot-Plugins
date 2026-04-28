@@ -3,7 +3,7 @@
     "name": "SeedKeeper",
     "description": "做种助手 - 智能管理 MoviePilot 转移后的种子做种任务，解决转移后 qBittorrent 无法做种和硬链接失败的问题",
     "labels": "做种,下载管理,自动化",
-    "version": "1.3.3",
+    "version": "1.4.0",
     "icon": "seedkeeper.png",
     "author": "ShukeBta",
     "level": 1,
@@ -12,28 +12,18 @@
     "git": "https://github.com/ShukeBta/MoviePilot-Plugins",
     "history": [
       {
+        "version": "1.4.0",
+        "date": "2026-04-28",
+        "content": "修复：下载器列表兼容多种 DownloaderHelper 签名并新增静态保底选项；修复做种策略与分享率字段 UI 间距不足导致重叠；统一版本号"
+      },
+      {
         "version": "1.3.3",
         "date": "2026-04-28",
         "content": "修复做种策略选择器字体重叠问题，改用按钮组形式"
       },
       {
-        "version": "1.3.2",
-        "date": "2026-04-28",
-        "content": "下载器改为始终可选；新增配置文件扫描获取下载器列表"
-      },
-      {
-        "version": "1.3.0",
-        "date": "2026-04-28",
-        "content": "下载器选择改为自动读取已配置的下载器列表"
-      },
-      {
-        "version": "1.2.0",
-        "date": "2026-04-28",
-        "content": "新增本地目录浏览器，可选择做种目录"
-      },
-      {
         "version": "1.1.0",
-        "date": "2026-04-26",
+        "date": "2026-04-27",
         "content": "支持设置全局默认做种目录"
       },
       {

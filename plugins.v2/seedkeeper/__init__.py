@@ -19,6 +19,12 @@ try:
 except ImportError:
     _FastAPIRequest = None
 
+try:
+    from app.helper.downloader import DownloaderHelper
+    _DownloaderHelper = DownloaderHelper
+except ImportError:
+    _DownloaderHelper = None
+
 
 class Seedkeeper(_PluginBase):
     """SeedKeeper 做种助手插件"""
@@ -27,7 +33,7 @@ class Seedkeeper(_PluginBase):
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.2.0"
+    plugin_version = "1.3.0"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
@@ -388,6 +394,13 @@ class Seedkeeper(_PluginBase):
                 "summary": "获取常用挂载点和推荐路径"
             },
             {
+                "path": "/downloaders/list",
+                "endpoint": self.downloaders_list,
+                "methods": ["GET"],
+                "auth": "bear",
+                "summary": "获取已配置的下载器列表"
+            },
+            {
                 "path": "/transfer/hook",
                 "endpoint": self.transfer_hook,
                 "methods": ["POST"],
@@ -694,6 +707,27 @@ class Seedkeeper(_PluginBase):
             mounts.insert(0, {"path": "/", "label": "/（根目录）", "icon": "mdi-server"})
 
         return {"mounts": mounts}
+
+    def downloaders_list(self) -> Dict[str, Any]:
+        """
+        返回 MoviePilot 中已配置的下载器列表。
+        """
+        if _DownloaderHelper is None:
+            return {"downloaders": [], "error": "DownloaderHelper 不可用"}
+        try:
+            helper = _DownloaderHelper()
+            configs = helper.get_configs() or {}
+            downloaders = []
+            for name, cfg in configs.items():
+                downloaders.append({
+                    "name": name,
+                    "type": getattr(cfg, "type", "") or "",
+                    "enabled": getattr(cfg, "enabled", True)
+                })
+            return {"downloaders": downloaders}
+        except Exception as e:
+            logger.error(f"SeedKeeper downloaders_list 失败: {e}")
+            return {"downloaders": [], "error": str(e)}
 
     def set_task_seed_dir(self, data: dict) -> Dict[str, Any]:
         """设置单个任务的做种目录，并立即通知下载器"""

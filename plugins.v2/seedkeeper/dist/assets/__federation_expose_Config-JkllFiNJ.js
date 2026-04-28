@@ -22,6 +22,7 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
     const emit = __emit;
     const dirBrowseDialog = ref(false);
     const dirBrowseValue = ref("");
+    const downloaderOptions = ref([]);
     function openDirBrowse() {
       dirBrowseValue.value = config.value.seed_dir || "";
       dirBrowseDialog.value = true;
@@ -46,16 +47,26 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
       { title: "按做种时间", value: "seedtime" },
       { title: "手动管理", value: "manual" }
     ];
-    const downloaderOptions = [
-      { title: "全部", value: "" },
-      { title: "qBittorrent", value: "qbittorrent" },
-      { title: "Transmission", value: "transmission" }
-    ];
-    onMounted(() => {
+    onMounted(async () => {
       if (props.initialConfig) {
         config.value = { ...config.value, ...props.initialConfig };
       }
+      await fetchDownloaders();
     });
+    async function fetchDownloaders() {
+      try {
+        const res = await props.api.get("/plugins/seedkeeper/downloaders/list");
+        if (res.downloaders && Array.isArray(res.downloaders)) {
+          downloaderOptions.value = res.downloaders.map((d) => ({
+            title: `${d.name}${d.type ? " (" + d.type + ")" : ""}`,
+            value: d.name,
+            disabled: !d.enabled
+          }));
+        }
+      } catch (e) {
+        console.warn("获取下载器列表失败:", e);
+      }
+    }
     function saveConfig() {
       emit("save", config.value);
     }
@@ -174,17 +185,17 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
         _createVNode(_component_v_select, {
           modelValue: config.value.downloaders,
           "onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => config.value.downloaders = $event),
-          items: downloaderOptions,
+          items: downloaderOptions.value,
           label: "下载器",
           density: "compact",
           multiple: "",
           chips: "",
           "closable-chips": "",
-          hint: "选择要管理的下载器",
+          hint: "勾选要由 SeedKeeper 管理的下载器（仅显示已在 MoviePilot 中配置的下载器）",
           "persistent-hint": "",
           disabled: !config.value.enabled,
           class: "mt-4"
-        }, null, 8, ["modelValue", "disabled"]),
+        }, null, 8, ["modelValue", "items", "disabled"]),
         _createVNode(_component_v_divider, { class: "my-4" }),
         _createElementVNode("div", _hoisted_2, [
           _createVNode(_component_v_icon, {
@@ -328,6 +339,6 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
   }
 });
 
-const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-da1a0bde"]]);
+const Config = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-97009a2f"]]);
 
 export { Config as default };

@@ -1,12 +1,16 @@
 {
   "name": "SeedKeeper",
   "description": "做种助手 - 智能管理 MoviePilot 转移后的种子做种任务，解决转移后 qBittorrent 无法做种和硬链接失败的问题",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "icon": "seedkeeper.png",
   "author": "ShukeBta",
   "level": 1,
-  "vue": false,
   "history": [
+    {
+      "version": "1.5.0",
+      "date": "2026-04-29",
+      "content": "彻底修复界面不显示问题：切换回 Vue Module Federation 渲染模式，由编译后的 Vue 组件负责 Config/Page/Dashboard 渲染；修复 plugin.json 错误的 vue:false 字段；get_form 和 get_page 均返回 None 以正确触发 Vue 渲染模式"
+    },
     {
       "version": "1.4.2",
       "date": "2026-04-29",

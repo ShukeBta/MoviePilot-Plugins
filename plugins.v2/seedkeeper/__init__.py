@@ -40,7 +40,7 @@ class Seedkeeper(_PluginBase):
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.4.2"
+    plugin_version = "1.5.0"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
@@ -48,15 +48,14 @@ class Seedkeeper(_PluginBase):
     auth_level = 1
 
     # ==================== 渲染模式 ====================
-    def get_render_mode(self) -> Tuple[str, str]:
+    @staticmethod
+    def get_render_mode() -> Tuple[str, Optional[str]]:
         """
         获取插件渲染模式
         返回: (渲染模式, 组件路径)
-        vuetify: JSON 配置模式
-        vue: Module Federation 远程组件模式
+        vue: Module Federation 远程组件模式，使用 dist/assets 中的编译后组件
         """
-        # 使用 vuetify 模式，彻底解决 Vue 组件缓存问题
-        return "vuetify", ""
+        return "vue", "dist/assets"
 
     # ==================== 侧栏导航 ====================
     def get_sidebar_nav(self) -> List[Dict[str, Any]]:
@@ -111,165 +110,9 @@ class Seedkeeper(_PluginBase):
         logger.info("SeedKeeper 插件已停止")
 
     # ==================== 配置页面 ====================
-    def get_form(self) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-        """获取配置表单"""
-        # 获取下载器选项
-        downloader_options = self._get_downloader_options()
-
-        return [
-            {
-                "component": "VSwitch",
-                "props": {
-                    "label": "启用插件",
-                    "hint": "开启后自动管理做种任务",
-                    "persistent-hint": True,
-                },
-                "model": "enabled"
-            },
-            {
-                "component": "VSwitch",
-                "props": {
-                    "label": "自动做种",
-                    "hint": "下载完成后自动开始做种",
-                    "persistent-hint": True,
-                },
-                "model": "auto_seed"
-            },
-            # 做种策略 - 使用按钮组
-            {
-                "component": "div",
-                "props": {"class": "mb-4"},
-                "content": [
-                    {
-                        "component": "div",
-                        "props": {"class": "text-caption text-medium-emphasis mb-2"},
-                        "content": "做种策略（决定何时停止做种）"
-                    },
-                    {
-                        "component": "VBtnToggle",
-                        "model": "strategy",
-                        "props": {
-                            "mandatory": True,
-                            "color": "primary",
-                            "density": "compact",
-                            "class": "w-100"
-                        },
-                        "content": [
-                            {
-                                "component": "VBtn",
-                                "props": {"value": "ratio", "size": "small"},
-                                "content": [
-                                    {"component": "VIcon", "props": {"start": True, "size": 16}, "content": "mdi-chart-areaspline"},
-                                    "按分享率"
-                                ]
-                            },
-                            {
-                                "component": "VBtn",
-                                "props": {"value": "seedtime", "size": "small"},
-                                "content": [
-                                    {"component": "VIcon", "props": {"start": True, "size": 16}, "content": "mdi-clock-outline"},
-                                    "按做种时间"
-                                ]
-                            },
-                            {
-                                "component": "VBtn",
-                                "props": {"value": "manual", "size": "small"},
-                                "content": [
-                                    {"component": "VIcon", "props": {"start": True, "size": 16}, "content": "mdi-hand-pointing-up"},
-                                    "手动管理"
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "component": "VRow",
-                "props": {"class": "mt-2"},
-                "content": [
-                    {
-                        "component": "VCol",
-                        "props": {"cols": 6},
-                        "content": [
-                            {
-                                "component": "VTextField",
-                                "props": {
-                                    "label": "最小分享率",
-                                    "type": "number",
-                                    "density": "compact",
-                                    "hint": "达到此分享率后开始计算",
-                                    "persistent-hint": True,
-                                },
-                                "model": "min_ratio"
-                            }
-                        ]
-                    },
-                    {
-                        "component": "VCol",
-                        "props": {"cols": 6},
-                        "content": [
-                            {
-                                "component": "VTextField",
-                                "props": {
-                                    "label": "最大分享率",
-                                    "type": "number",
-                                    "density": "compact",
-                                    "hint": "达到此分享率后自动处理",
-                                    "persistent-hint": True,
-                                },
-                                "model": "max_ratio"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "component": "VTextField",
-                "props": {
-                    "label": "做种时间限制（小时）",
-                    "type": "number",
-                    "density": "compact",
-                    "hint": "0 表示不做限制",
-                    "persistent-hint": True,
-                },
-                "model": "seed_time_limit"
-            },
-            {
-                "component": "VSwitch",
-                "props": {
-                    "label": "达到限制后删除种子",
-                    "hint": "否则只暂停不做种",
-                    "persistent-hint": True,
-                },
-                "model": "remove_on_limit"
-            },
-            {
-                "component": "VSelect",
-                "props": {
-                    "label": "下载器",
-                    "items": downloader_options,
-                    "multiple": True,
-                    "chips": True,
-                    "closable-chips": True,
-                    "density": "compact",
-                    "hint": "选择要由 SeedKeeper 管理的下载器（仅显示已在 MoviePilot 中配置的下载器）",
-                    "persistent-hint": True,
-                },
-                "model": "downloaders"
-            },
-            {
-                "component": "VTextField",
-                "props": {
-                    "label": "默认做种目录",
-                    "density": "compact",
-                    "hint": "转移后做种使用的目录（如 /downloads/seeding），留空则使用下载器原始保存路径",
-                    "persistent-hint": True,
-                    "placeholder": "例如：/vol2/1000/qBittorrent/seeding",
-                    "clearable": True,
-                },
-                "model": "seed_dir"
-            }
-        ], {
+    def get_form(self) -> Tuple[Optional[List[Dict[str, Any]]], Dict[str, Any]]:
+        """获取配置表单（Vue 模式下返回 None，由 Vue 组件负责渲染）"""
+        return None, {
             "enabled": False,
             "auto_seed": True,
             "strategy": "ratio",
@@ -298,149 +141,9 @@ class Seedkeeper(_PluginBase):
         return options if options else [{"title": "未检测到下载器", "value": "__none__"}]
 
     # ==================== 详情页面 ====================
-    def get_page(self) -> List[Dict[str, Any]]:
-        """获取详情页面（vuetify 模式，直接嵌入实际数据）"""
-        stats = self.get_stats()
-        tasks = self.get_tasks()
-
-        # 构建任务行
-        status_label = {"seeding": "做种中", "completed": "已完成", "paused": "已暂停"}
-        task_rows = []
-        for task in tasks:
-            name = task.get("name") or task.get("hash", "")[:8]
-            ratio = task.get("current_ratio", 0.0)
-            seed_time = task.get("seeding_time", 0)
-            status = task.get("status", "pending")
-            task_rows.append(
-                {
-                    "component": "tr",
-                    "content": [
-                        {"component": "td", "content": str(name)},
-                        {"component": "td", "content": f"{ratio:.2f}"},
-                        {"component": "td", "content": f"{seed_time}h"},
-                        {"component": "td", "content": status_label.get(status, status)},
-                    ],
-                }
-            )
-
-        if not task_rows:
-            task_rows = [
-                {
-                    "component": "tr",
-                    "content": [
-                        {
-                            "component": "td",
-                            "props": {"colspan": 4, "class": "text-center text-medium-emphasis"},
-                            "content": "暂无做种任务",
-                        }
-                    ],
-                }
-            ]
-
-        return [
-            {
-                "component": "VCard",
-                "props": {"class": "mb-4"},
-                "content": [
-                    {
-                        "component": "VCardTitle",
-                        "props": {"class": "text-h6"},
-                        "content": "📊 做种统计"
-                    },
-                    {
-                        "component": "VCardText",
-                        "content": [
-                            {
-                                "component": "VRow",
-                                "content": [
-                                    {
-                                        "component": "VCol",
-                                        "props": {"cols": 4},
-                                        "content": [
-                                            {
-                                                "component": "VSheet",
-                                                "props": {"class": "text-center pa-2 rounded", "color": "primary"},
-                                                "content": [
-                                                    {"component": "div", "props": {"class": "text-h4"}, "content": str(stats.get("active", 0))},
-                                                    {"component": "div", "props": {"class": "text-caption"}, "content": "做种中"}
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "component": "VCol",
-                                        "props": {"cols": 4},
-                                        "content": [
-                                            {
-                                                "component": "VSheet",
-                                                "props": {"class": "text-center pa-2 rounded", "color": "success"},
-                                                "content": [
-                                                    {"component": "div", "props": {"class": "text-h4"}, "content": str(stats.get("completed", 0))},
-                                                    {"component": "div", "props": {"class": "text-caption"}, "content": "已完成"}
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "component": "VCol",
-                                        "props": {"cols": 4},
-                                        "content": [
-                                            {
-                                                "component": "VSheet",
-                                                "props": {"class": "text-center pa-2 rounded", "color": "warning"},
-                                                "content": [
-                                                    {"component": "div", "props": {"class": "text-h4"}, "content": str(stats.get("pending", 0))},
-                                                    {"component": "div", "props": {"class": "text-caption"}, "content": "等待中"}
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "component": "VCard",
-                "content": [
-                    {
-                        "component": "VCardTitle",
-                        "props": {"class": "text-h6"},
-                        "content": "🌱 做种任务列表"
-                    },
-                    {
-                        "component": "VCardText",
-                        "content": [
-                            {
-                                "component": "VTable",
-                                "props": {"density": "compact"},
-                                "content": [
-                                    {
-                                        "component": "thead",
-                                        "content": [
-                                            {
-                                                "component": "tr",
-                                                "content": [
-                                                    {"component": "th", "content": "任务名称"},
-                                                    {"component": "th", "content": "当前分享率"},
-                                                    {"component": "th", "content": "做种时间"},
-                                                    {"component": "th", "content": "状态"},
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "component": "tbody",
-                                        "content": task_rows
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
+    def get_page(self) -> Optional[List[Dict[str, Any]]]:
+        """获取详情页面（Vue 模式下返回 None，由 Vue 组件负责渲染）"""
+        return None
 
     # ==================== API 接口 ====================
     def get_api(self) -> List[Dict[str, Any]]:

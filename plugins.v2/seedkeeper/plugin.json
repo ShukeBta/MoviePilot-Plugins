@@ -1,12 +1,17 @@
 {
   "name": "SeedKeeper",
   "description": "做种助手 - 智能管理 MoviePilot 转移后的种子做种任务，解决转移后 qBittorrent 无法做种和硬链接失败的问题",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "icon": "seedkeeper.png",
   "author": "ShukeBta",
   "level": 1,
   "vue": false,
   "history": [
+    {
+      "version": "1.4.2",
+      "date": "2026-04-29",
+      "content": "修复：VBtnToggle model 属性错放 props 导致策略选择显示异常；修复 get_page 使用 Vue 模板语法导致统计数据不显示的问题"
+    },
     {
       "version": "1.4.1",
       "date": "2026-04-28",

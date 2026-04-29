@@ -40,7 +40,7 @@ class Seedkeeper(_PluginBase):
     plugin_name = "SeedKeeper"
     plugin_desc = "做种助手 - 智能管理转移后的种子做种任务，支持自定义做种目录"
     plugin_icon = "seedkeeper.png"
-    plugin_version = "1.4.0"
+    plugin_version = "1.4.2"
     plugin_author = "ShukeBta"
     author_url = "https://github.com/ShukeBta/SeedKeeper"
     plugin_config_prefix = "seedkeeper_"
@@ -147,8 +147,8 @@ class Seedkeeper(_PluginBase):
                     },
                     {
                         "component": "VBtnToggle",
+                        "model": "strategy",
                         "props": {
-                            "model": "strategy",
                             "mandatory": True,
                             "color": "primary",
                             "density": "compact",
@@ -299,7 +299,44 @@ class Seedkeeper(_PluginBase):
 
     # ==================== 详情页面 ====================
     def get_page(self) -> List[Dict[str, Any]]:
-        """获取详情页面"""
+        """获取详情页面（vuetify 模式，直接嵌入实际数据）"""
+        stats = self.get_stats()
+        tasks = self.get_tasks()
+
+        # 构建任务行
+        status_label = {"seeding": "做种中", "completed": "已完成", "paused": "已暂停"}
+        task_rows = []
+        for task in tasks:
+            name = task.get("name") or task.get("hash", "")[:8]
+            ratio = task.get("current_ratio", 0.0)
+            seed_time = task.get("seeding_time", 0)
+            status = task.get("status", "pending")
+            task_rows.append(
+                {
+                    "component": "tr",
+                    "content": [
+                        {"component": "td", "content": str(name)},
+                        {"component": "td", "content": f"{ratio:.2f}"},
+                        {"component": "td", "content": f"{seed_time}h"},
+                        {"component": "td", "content": status_label.get(status, status)},
+                    ],
+                }
+            )
+
+        if not task_rows:
+            task_rows = [
+                {
+                    "component": "tr",
+                    "content": [
+                        {
+                            "component": "td",
+                            "props": {"colspan": 4, "class": "text-center text-medium-emphasis"},
+                            "content": "暂无做种任务",
+                        }
+                    ],
+                }
+            ]
+
         return [
             {
                 "component": "VCard",
@@ -322,9 +359,9 @@ class Seedkeeper(_PluginBase):
                                         "content": [
                                             {
                                                 "component": "VSheet",
-                                                "props": {"class": "text-center pa-2", "color": "primary"},
+                                                "props": {"class": "text-center pa-2 rounded", "color": "primary"},
                                                 "content": [
-                                                    {"component": "div", "props": {"class": "text-h4"}, "content": "{{ stats.active }}"},
+                                                    {"component": "div", "props": {"class": "text-h4"}, "content": str(stats.get("active", 0))},
                                                     {"component": "div", "props": {"class": "text-caption"}, "content": "做种中"}
                                                 ]
                                             }
@@ -336,9 +373,9 @@ class Seedkeeper(_PluginBase):
                                         "content": [
                                             {
                                                 "component": "VSheet",
-                                                "props": {"class": "text-center pa-2", "color": "success"},
+                                                "props": {"class": "text-center pa-2 rounded", "color": "success"},
                                                 "content": [
-                                                    {"component": "div", "props": {"class": "text-h4"}, "content": "{{ stats.completed }}"},
+                                                    {"component": "div", "props": {"class": "text-h4"}, "content": str(stats.get("completed", 0))},
                                                     {"component": "div", "props": {"class": "text-caption"}, "content": "已完成"}
                                                 ]
                                             }
@@ -350,9 +387,9 @@ class Seedkeeper(_PluginBase):
                                         "content": [
                                             {
                                                 "component": "VSheet",
-                                                "props": {"class": "text-center pa-2", "color": "warning"},
+                                                "props": {"class": "text-center pa-2 rounded", "color": "warning"},
                                                 "content": [
-                                                    {"component": "div", "props": {"class": "text-h4"}, "content": "{{ stats.pending }}"},
+                                                    {"component": "div", "props": {"class": "text-h4"}, "content": str(stats.get("pending", 0))},
                                                     {"component": "div", "props": {"class": "text-caption"}, "content": "等待中"}
                                                 ]
                                             }
@@ -369,20 +406,8 @@ class Seedkeeper(_PluginBase):
                 "content": [
                     {
                         "component": "VCardTitle",
-                        "props": {"class": "d-flex justify-space-between align-center"},
-                        "content": [
-                            {"component": "span", "content": "🌱 做种任务列表"},
-                            {
-                                "component": "VBtn",
-                                "props": {
-                                    "size": "small",
-                                    "color": "primary",
-                                    "variant": "tonal",
-                                    "@click": "refreshTasks"
-                                },
-                                "content": "刷新"
-                            }
-                        ]
+                        "props": {"class": "text-h6"},
+                        "content": "🌱 做种任务列表"
                     },
                     {
                         "component": "VCardText",
@@ -390,16 +415,26 @@ class Seedkeeper(_PluginBase):
                             {
                                 "component": "VTable",
                                 "props": {"density": "compact"},
-                                "content": {
-                                    "headers": [
-                                        {"title": "任务名称"},
-                                        {"title": "当前分享率"},
-                                        {"title": "做种时间"},
-                                        {"title": "状态"},
-                                        {"title": "操作"}
-                                    ],
-                                    "items": "{{ tasks }}"
-                                }
+                                "content": [
+                                    {
+                                        "component": "thead",
+                                        "content": [
+                                            {
+                                                "component": "tr",
+                                                "content": [
+                                                    {"component": "th", "content": "任务名称"},
+                                                    {"component": "th", "content": "当前分享率"},
+                                                    {"component": "th", "content": "做种时间"},
+                                                    {"component": "th", "content": "状态"},
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "component": "tbody",
+                                        "content": task_rows
+                                    }
+                                ]
                             }
                         ]
                     }
